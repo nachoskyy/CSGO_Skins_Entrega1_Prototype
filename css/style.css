@@ -71,6 +71,10 @@ footer .social a{margin-right:10px}
 .filter-item{width:100%; text-align:left; padding:8px 10px; border-radius:10px; border:1px solid #2a2b2f;background:#0f1012; cursor:pointer;color:#fff;}
 .filter-item:hover{background:#15161a}
 .filter-item.active{border-color:var(--acc)}
+.blog-card{padding: 20px;}
+.blog-cover{width: 100%; height:clamp(220px, 30vw, 360px);border-radius:12px; border:1px solid var(--line);object-fit: cover; object-position:center;}
+.blog-card h3{font-size:20px;margin-top:10px;}
+.blog-card p{font-size:15px;}
 
 .only-mobile{display:none}
 /* responsive */
