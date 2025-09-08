@@ -75,6 +75,11 @@ footer .social a{margin-right:10px}
 .blog-cover{width: 100%; height:clamp(220px, 30vw, 360px);border-radius:12px; border:1px solid var(--line);object-fit: cover; object-position:center;}
 .blog-card h3{font-size:20px;margin-top:10px;}
 .blog-card p{font-size:15px;}
+.sidebar-cart{display:none !important}
+.nav-cart{position: relative;display:inline-flex; align-items:center; justify-content:center;width:36px; height:36px; margin-left:10px;border:1px solid var(--line); border-radius:10px;background:#2a2b2f; color:var(--ink);}
+.nav-badge{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--acc);color:#000;font-size:11px;font-weight:700;line-height:18px;text-align:center;display:none;}
+.nav-cart:hover{ background:#15161a }
+.nav-cart.has-items .nav-badge{display:block}
 
 .only-mobile{display:none}
 /* responsive */
