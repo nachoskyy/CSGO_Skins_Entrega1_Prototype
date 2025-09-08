@@ -56,7 +56,7 @@ function renderProducts(list){
     catSel?.addEventListener("change", e => applyFilter(e.target.value));
     const params = new URLSearchParams(location.search);
     applyFilter(params.get("cat") || "");}
-  // Product detail
+  // detalle de productos
   const pd = document.getElementById("product-detail");
   if(pd){
     const params = new URLSearchParams(location.search);
@@ -70,7 +70,7 @@ function renderProducts(list){
     document.getElementById("add-to-cart").addEventListener("click", ()=> addToCart(p.id));
   }
 
-  // Regions / comunas linkage (register + admin user)
+  // region y comunas
   const regionSel = document.getElementById("region");
   const comunaSel = document.getElementById("comuna");
   const aRegionSel = document.getElementById("a-region");
@@ -102,7 +102,7 @@ function renderProducts(list){
       if(!ok) return;
       const hashed = await hashPassword(pass);
       localStorage.setItem("last_login", JSON.stringify({email, passHash: hashed, at: Date.now()}));
-      alert("Login demo OK (hash guardado local).");
+      alert("Login funciona. (demo)");
       location.href = "index.html";
     });
   }
@@ -125,6 +125,7 @@ function renderProducts(list){
     });
   }
 
+  //registro
   const regForm = document.getElementById("register-form");
   if(regForm){
     regForm.addEventListener("submit", async (e)=>{
@@ -140,6 +141,16 @@ function renderProducts(list){
       if(!nombres){ setError(regForm,"nombres","Requerido"); ok=false; }
       if(!apellidos){ setError(regForm,"apellidos","Requerido"); ok=false; }
       if(!validEmailDomain(email)){ setError(regForm,"email","Dominio no permitido"); ok=false; }
+      function yearsBetween(a,b){
+      let y = b.getFullYear() - a.getFullYear();
+      const m = b.getMonth() - a.getMonth();
+      if (m < 0 || (m===0 && b.getDate() < a.getDate())) y--;
+      return y;
+      }
+      const hoy = new Date();
+      const dob = new Date(String(fecha));
+      if(isNaN(dob)){ setError(regForm,"fecha","Fecha inválida"); ok=false; }
+      else if(yearsBetween(dob, hoy) < 18){ setError(regForm,"fecha","Debes ser mayor de 18 o ingresar una fecha valida"); ok=false; }
       if(!tipo){ setError(regForm,"tipo","Seleccione un tipo"); ok=false; }
       if(!region){ setError(regForm,"region","Seleccione región"); ok=false; }
       if(!comuna){ setError(regForm,"comuna","Seleccione comuna"); ok=false; }
