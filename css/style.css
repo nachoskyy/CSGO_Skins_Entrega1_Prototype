@@ -1,6 +1,6 @@
 
 :root{
-  --bg:#0b0b0c; --card:#111214; --ink:#e9e9ea; --muted:#9aa0a6; --acc:#39ff14; --line:#202124; --danger:#ff5555;
+  --bg:#0b0b0c; --card:#111214; --ink:#e9e9ea; --muted:#9aa0a6; --acc:#39ff14; --line:#202124; --danger:#ff5555; --cart-btn: 48px; --cart-icon: 24px; --cart-badge: 20px;
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif}
@@ -76,10 +76,16 @@ footer .social a{margin-right:10px}
 .blog-card h3{font-size:20px;margin-top:10px;}
 .blog-card p{font-size:15px;}
 .sidebar-cart{display:none !important}
-.nav-cart{position: relative;display:inline-flex; align-items:center; justify-content:center;width:36px; height:36px; margin-left:10px;border:1px solid var(--line); border-radius:10px;background:#2a2b2f; color:var(--ink);}
-.nav-badge{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--acc);color:#000;font-size:11px;font-weight:700;line-height:18px;text-align:center;display:none;}
+.nav-cart{position: relative;display:inline-flex; align-items:center; justify-content:center;width:var(--cart-btn); height:var(--cart-btn); margin-left:10px;border:1px solid var(--line); border-radius:12px;background:#2a2b2f; color:#e9e9ea;}
+.nav-badge{position:absolute;top:-8px;right:-8px;min-width:var(--cart-badge);height:var(--cart-badge);padding:0 5px;border-radius:999px;background:var(--acc);color:#000;font-size:12px;font-weight:700;line-height:var(--cart-badge);text-align:center;display:none;}
 .nav-cart:hover{ background:#15161a }
 .nav-cart.has-items .nav-badge{display:block}
+.nav-cart::before{content:""; display:block; width:var(--cart-icon); height:var(--cart-icon);background-color: currentColor;-webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23fff" d="M7 4H5L4 6h2l3.6 7.59-1.35 2.44A2 2 0 0 0 10 18h9v-2h-8.42c-.14 0-.25-.11-.25-.25l.03-.12L11.1 14h5.45a2 2 0 0 0 1.79-1.11l3.58-6.49A1 1 0 0 0 21 5H7zM7 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm10 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></svg>');
+mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23fff" d="M7 4H5L4 6h2l3.6 7.59-1.35 2.44A2 2 0 0 0 10 18h9v-2h-8.42c-.14 0-.25-.11-.25-.25l.03-.12L11.1 14h5.45a2 2 0 0 0 1.79-1.11l3.58-6.49A1 1 0 0 0 21 5H7zM7 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm10 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></svg>');
+-webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+-webkit-mask-position: center;  mask-position: center;
+-webkit-mask-size: contain;     mask-size: contain;
+}
 
 .only-mobile{display:none}
 /* responsive */
