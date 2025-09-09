@@ -1,5 +1,5 @@
 
-const CART_KEY = "skins4u_cart";
+const CART_KEY = "K&N Skins";
 
 function getCart(){
   try{ return JSON.parse(localStorage.getItem(CART_KEY)) || []; }catch(e){ return []; }
