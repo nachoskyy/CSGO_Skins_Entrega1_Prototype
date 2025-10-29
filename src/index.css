@@ -234,3 +234,73 @@ body { padding-top: 70px; }
   .right { width: 100% !important; }           /* controles a ancho completo */
   .btn-delete { width: 100%; }                 /* Eliminar como botón de bloque */
 }
+
+/* === Alinear Expiración y CVV (igualar alturas) === */
+.form-row-eq{ align-items: stretch; }               /* columnas ocupan misma altura */
+.form-group-eq{
+  display:flex;
+  flex-direction:column;
+  height:100%;
+}
+.form-group-eq .form-label{ margin-bottom:.35rem; }
+.form-group-eq .form-text{ margin-top:.25rem; }
+
+/* === Carrito: normalizar padding/bordes de la lista evita que "se vea corrido" === */
+.cart-card .list-group{
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: .5rem;
+}
+.cart-card .list-group-item{
+  border-color: rgba(255,255,255,0.08);
+  padding: .75rem 1rem;
+}
+/* ==== Centrado exacto del listado del carrito ==== */
+.cart-card .cart-list {
+  padding: 0 1rem;          /* mismo padding a izquierda y derecha */
+  border: 0;                /* sin borde del list-group, evita “corrido” */
+}
+.cart-card .cart-list .list-group-item {
+  border: 0;                /* quitamos borde propio */
+  padding-left: 0;          /* el padding ya lo da cart-list */
+  padding-right: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.cart-card .cart-list .list-group-item:last-child {
+  border-bottom: 0;
+}
+
+/* ===== Alinear cantidad, precio y eliminar en desktop ===== */
+@media (min-width: 577px) {
+  .cart-item .right {
+    margin-left: auto;                 /* empuja a la derecha */
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    width: 370px;                      /* << mueve todo este bloque un poco a la derecha */
+  }
+  .cart-item .qty-group { width: 140px; }   /* ancho fijo del selector */
+  .cart-item .price     { width: 110px; text-align: right; } /* precio fijo */
+}
+
+/* ===== En móvil sigue responsivo (sin cambios visuales) ===== */
+@media (max-width: 576px) {
+  .cart-item .right {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: .5rem;
+  }
+  .cart-item .price { width: 100%; text-align: right; }
+  .btn-delete { width: 100%; }
+}
+
+/* (opcional) si tu lista tiene padding: lo normalizamos para centrar visualmente */
+.cart-card .cart-list { padding: 0 1rem; }
+.cart-card .cart-list .list-group-item {
+  border: 0;
+  padding-left: 0;
+  padding-right: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.cart-card .cart-list .list-group-item:last-child { border-bottom: 0; }

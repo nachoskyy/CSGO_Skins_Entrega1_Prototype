@@ -1,4 +1,4 @@
-// src/pages/Cart.jsx — Layout responsive de ítems
+// src/pages/Cart.jsx — Alinea cantidad, precio y eliminar sin cambiar el estilo
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Store, subscribe } from "../data/store";
@@ -61,16 +61,16 @@ export default function Cart(){
     <div className="container mt-3">
       <h2 className="section-title">Carrito</h2>
 
-      <div className="card p-3 bg-dark text-light border-secondary">
+      <div className="card p-3 bg-dark text-light border-secondary cart-card">
         {items.length === 0 ? (
           <div className="text-secondary">
             Tu carrito está vacío. <Link to="/productos">Ver productos</Link>
           </div>
         ) : (
           <>
-            <div className="list-group">
+            <div className="list-group cart-list">
               {items.map(it => (
-                <div key={it.id} className="list-group-item bg-dark text-light border-secondary">
+                <div key={it.id} className="list-group-item bg-dark text-light">
                   <div className="d-flex flex-column flex-sm-row gap-3 align-items-start align-items-sm-center cart-item">
                     {/* Imagen */}
                     <div className="thumb-box">
@@ -87,8 +87,8 @@ export default function Cart(){
                       <div className="text-secondary small">{it.category}</div>
                     </div>
 
-                    {/* Controles (responsivos) */}
-                    <div className="ms-sm-auto d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2 w-100 w-sm-auto right">
+                    {/* Controles a la derecha (sin cambiar look) */}
+                    <div className="right">
                       <div className="input-group input-group-sm qty-group">
                         <button className="btn btn-outline-secondary" onClick={()=> updateQty(it.id, it.qty-1)}>-</button>
                         <input
@@ -100,8 +100,14 @@ export default function Cart(){
                         />
                         <button className="btn btn-outline-secondary" onClick={()=> updateQty(it.id, it.qty+1)}>+</button>
                       </div>
-                      <div className="fw-semibold text-nowrap">{money(it.price * it.qty)}</div>
-                      <button className="btn btn-outline-danger btn-sm btn-delete" onClick={()=> remove(it.id)}>Eliminar</button>
+
+                      <div className="fw-semibold text-nowrap price">
+                        {money(it.price * it.qty)}
+                      </div>
+
+                      <button className="btn btn-outline-danger btn-sm btn-delete" onClick={()=> remove(it.id)}>
+                        Eliminar
+                      </button>
                     </div>
                   </div>
                 </div>

@@ -56,23 +56,17 @@ export default function Checkout(){
     const { name, value } = e.target;
 
     if (name === "card") {
-      // Formato #### #### #### #### y máx. 16 dígitos (19 con espacios)
-      const next = normalizeCardNumber(value);
+      const next = normalizeCardNumber(value);     // #### #### #### ####
       return setForm(f => ({...f, card: next}));
     }
-
     if (name === "exp") {
-      // Formato MM/YY, auto-slash y máx. 5 chars
-      const next = normalizeExpiry(value).slice(0, 5);
+      const next = normalizeExpiry(value).slice(0, 5); // MM/YY
       return setForm(f => ({...f, exp: next}));
     }
-
     if (name === "cvv") {
-      // Solo 3 dígitos
-      const next = digitsOnly(value).slice(0, 3);
+      const next = digitsOnly(value).slice(0, 3);       // 3 dígitos
       return setForm(f => ({...f, cvv: next}));
     }
-
     setForm(f => ({...f, [name]: value}));
   };
 
@@ -153,6 +147,7 @@ export default function Checkout(){
               {errors.direccion && <div className="text-danger mt-1">{errors.direccion}</div>}
             </div>
 
+            {/* Pago con tarjeta */}
             <h5 className="mt-2">Pago con tarjeta</h5>
 
             <div className="mb-3">
@@ -165,41 +160,49 @@ export default function Checkout(){
                 inputMode="numeric"
                 autoComplete="cc-number"
                 placeholder="1234 5678 9012 3456"
-                maxLength={19} // 16 dígitos + 3 espacios
+                maxLength={19}
               />
               {errors.card && <div className="text-danger mt-1">{errors.card}</div>}
-              <div className="form-text text-secondary">Ingresa los datos de la tarjeta.</div>
+              <div className="form-text text-secondary">Ingresa 16 dígitos. Se agrupan automático en 4.</div>
             </div>
 
-            <div className="row g-3 align-items-end">
-              <div className="col-6">
-                <label className="form-label">Expiración (MM/YY)</label>
-                <input
-                  name="exp"
-                  value={form.exp}
-                  onChange={onChange}
-                  className="form-control bg-dark text-light border-secondary"
-                  inputMode="numeric"
-                  autoComplete="cc-exp"
-                  placeholder="MM/YY"
-                  maxLength={5}
-                />
-                {errors.exp && <div className="text-danger mt-1">{errors.exp}</div>}
-                <div className="form-text text-secondary">Ej: 03/28 (marzo de 2028)</div>
+            {/* Columnas iguales y alineadas en base */}
+            <div className="row g-3 form-row-eq">
+              <div className="col-12 col-sm-6">
+                <div className="form-group-eq">
+                  <label className="form-label">Expiración (MM/YY)</label>
+                  <input
+                    name="exp"
+                    value={form.exp}
+                    onChange={onChange}
+                    className="form-control bg-dark text-light border-secondary"
+                    inputMode="numeric"
+                    autoComplete="cc-exp"
+                    placeholder="MM/YY"
+                    maxLength={5}
+                  />
+                  {errors.exp && <div className="text-danger mt-1">{errors.exp}</div>}
+                  <div className="form-text text-secondary">Ej: 03/28 (marzo de 2028)</div>
+                </div>
               </div>
-              <div className="col-6">
-                <label className="form-label">CVV</label>
-                <input
-                  name="cvv"
-                  value={form.cvv}
-                  onChange={onChange}
-                  className="form-control bg-dark text-light border-secondary"
-                  inputMode="numeric"
-                  autoComplete="cc-csc"
-                  placeholder="123"
-                  maxLength={3}
-                />
-                {errors.cvv && <div className="text-danger mt-1">{errors.cvv}</div>}
+
+              <div className="col-12 col-sm-6">
+                <div className="form-group-eq">
+                  <label className="form-label">CVV</label>
+                  <input
+                    name="cvv"
+                    value={form.cvv}
+                    onChange={onChange}
+                    className="form-control bg-dark text-light border-secondary"
+                    inputMode="numeric"
+                    autoComplete="cc-csc"
+                    placeholder="123"
+                    maxLength={3}
+                  />
+                  {errors.cvv && <div className="text-danger mt-1">{errors.cvv}</div>}
+                  {/* placeholder invisible para igualar alturas */}
+                  <div className="form-text invisible">placeholder</div>
+                </div>
               </div>
             </div>
 
@@ -246,9 +249,6 @@ export default function Checkout(){
                 </div>
               </div>
             )}
-            <div className="form-text text-secondary mt-3">
-              Demo: si la tarjeta termina en <code>0</code> simulamos un rechazo y verás <em>compra-fallida</em>.
-            </div>
           </div>
         </div>
       </div>
