@@ -1,5 +1,5 @@
 /* ===========================
-   THEME 
+   THEME
    =========================== */
 :root{
   --bg-0: #0b1117;   /* fondo principal */
@@ -13,7 +13,11 @@
 }
 
 html, body, #root { height: 100%; }
-body { background: var(--bg-0); color: var(--text); }
+body {
+  background: var(--bg-0);
+  color: var(--text);
+  padding-top: 70px; /* compensar navbar fixed-top */
+}
 
 /* Títulos y utilidades */
 h1,h2,h3,h4,h5,h6 { color: var(--text); }
@@ -22,8 +26,6 @@ h1,h2,h3,h4,h5,h6 { color: var(--text); }
 /* Bootstrap → modo dark coherente */
 .bg-body-tertiary { background: var(--bg-1) !important; }
 .border-bottom { border-color: var(--card-border) !important; }
-.navbar .nav-link { color: #dbe5ef; }                 /* más claro */
-.navbar .nav-link.active, .navbar .nav-link:hover { color: #ffffff; }
 .navbar-brand { color: #fff !important; }
 .btn-outline-primary { color: #e5eef9; border-color: var(--card-border); }
 .btn-outline-primary:hover { background: var(--card-border); }
@@ -39,14 +41,51 @@ a:hover { color: var(--brand); }
 .btn-brand { background: var(--brand); color: #051114; border: none; font-weight: 600; }
 .btn-brand:hover{ background: var(--brand-2); }
 
+/* ====== NAVBAR “glass” fija ====== */
+.navbar-glass {
+  background: rgba(17, 24, 39, 0.86);
+  backdrop-filter: saturate(160%) blur(8px);
+  -webkit-backdrop-filter: saturate(160%) blur(8px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px rgba(0,0,0,0.25);
+}
+
+/* Links de navegación */
+.navbar .nav-link {
+  color: rgba(255,255,255,0.75) !important;
+  transition: color .15s ease, opacity .15s ease;
+}
+.navbar .nav-link:hover { color: #fff !important; }
+.navbar .nav-link.active {
+  color: var(--brand) !important;
+  font-weight: 600;
+}
+
+/* Botones outline más suaves */
+.btn-soft {
+  --bs-btn-color: rgba(255,255,255,0.9);
+  --bs-btn-border-color: rgba(255,255,255,0.25);
+  --bs-btn-hover-color: #111827;
+  --bs-btn-hover-bg: #22c55e;
+  --bs-btn-hover-border-color: #22c55e;
+  --bs-btn-active-bg: #16a34a;
+  --bs-btn-active-border-color: #16a34a;
+  border-width: 1px;
+}
+
 /* HERO */
-.hero { position: relative; border-radius: 18px; overflow: hidden; background: var(--bg-1); padding: 24px; }
-.hero__bg{ position: absolute; inset: 0;
+.hero {
+  position: relative; border-radius: 18px; overflow: hidden;
+  background: var(--bg-1); padding: 24px;
+}
+.hero__bg{
+  position: absolute; inset: 0;
   background: linear-gradient(135deg, rgba(34,197,94,.08), transparent 40%),
               linear-gradient(0deg, rgba(0,0,0,.35), rgba(0,0,0,.35));
   pointer-events: none;
 }
-.hero__pill{ display:inline-block; color: var(--brand); background: rgba(34,197,94,.1);
+.hero__pill{
+  display:inline-block; color: var(--brand); background: rgba(34,197,94,.1);
   border: 1px solid rgba(34,197,94,.25); padding: 6px 10px; border-radius: 999px; font-size: .85rem;
 }
 
@@ -65,9 +104,33 @@ a:hover { color: var(--brand); }
   filter: drop-shadow(0 8px 18px rgba(0,0,0,.35));
 }
 
+/* ===== Productos (móvil) ===== */
+.product-card .img-box {
+  width: 100%;
+  height: 220px;
+  background: radial-gradient(70% 70% at 50% 50%, rgba(255,255,255,0.02), rgba(255,255,255,0.01) 60%, transparent);
+  display: grid;
+  place-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.product-card .img-box img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 16px rgba(0,0,0,0.5));
+}
+.btn-add-mobile { padding-inline: 14px; }
+
+@media (max-width: 576px) {
+  .product-card .img-box { height: 180px; }
+  .btn-add-mobile { width: 100%; }
+}
+
 /* CAROUSEL */
-.carousel-box{ position: relative; background: var(--bg-1); border: 1px solid var(--card-border);
-  border-radius: 16px; padding: 18px; overflow: hidden; }
+.carousel-box{
+  position: relative; background: var(--bg-1); border: 1px solid var(--card-border);
+  border-radius: 16px; padding: 18px; overflow: hidden;
+}
 .carousel-box::before, .carousel-box::after{
   content:""; position:absolute; top:0; bottom:0; width:48px; z-index:1; pointer-events:none;
 }
@@ -102,7 +165,7 @@ a:hover { color: var(--brand); }
   position: fixed;
   right: 22px;
   bottom: 22px;
-  z-index: 9999;                 /* por encima de carruseles con overflow hidden */
+  z-index: 9999;
   background: linear-gradient(90deg, #1fbf59, #32d47a);
   color: #051114;
   font-weight: 700;
@@ -118,7 +181,6 @@ a:hover { color: var(--brand); }
   box-shadow: 0 14px 34px rgba(0,0,0,.55);
   filter: saturate(1.05);
 }
-/* Responsive */
 @media (max-width: 576px){
   .help-fab{ right: 14px; bottom: 14px; padding: 10px 14px; font-size: 0.95rem; }
 }
@@ -153,43 +215,6 @@ a:hover { color: var(--brand); }
   font-weight: 700;
 }
 
-/* ====== NAVBAR “glass” fija ====== */
-.navbar-glass {
-  background: rgba(17, 24, 39, 0.86); /* gris muy oscuro con transparencia */
-  backdrop-filter: saturate(160%) blur(8px);
-  -webkit-backdrop-filter: saturate(160%) blur(8px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px rgba(0,0,0,0.25);
-}
-
-/* Compensar la navbar fixed-top (ajusta si tu navbar es más alta) */
-body { padding-top: 70px; }
-
-/* Links de navegación */
-.navbar .nav-link {
-  color: rgba(255,255,255,0.75) !important;
-  transition: color .15s ease, opacity .15s ease;
-}
-.navbar .nav-link:hover {
-  color: #fff !important;
-}
-.navbar .nav-link.active {
-  color: #22c55e !important; /* verde activo */
-  font-weight: 600;
-}
-
-/* Botones outline más suaves */
-.btn-soft {
-  --bs-btn-color: rgba(255,255,255,0.9);
-  --bs-btn-border-color: rgba(255,255,255,0.25);
-  --bs-btn-hover-color: #111827;
-  --bs-btn-hover-bg: #22c55e;
-  --bs-btn-hover-border-color: #22c55e;
-  --bs-btn-active-bg: #16a34a;
-  --bs-btn-active-border-color: #16a34a;
-  border-width: 1px;
-}
-
 /* Badge del carrito pequeño y legible */
 .cart-badge {
   font-size: 10px;
@@ -197,29 +222,7 @@ body { padding-top: 70px; }
   line-height: 1;
 }
 
-/* ===== Productos (móvil) ===== */
-.product-card .img-box {
-  width: 100%;
-  height: 220px;
-  background: radial-gradient(70% 70% at 50% 50%, rgba(255,255,255,0.02), rgba(255,255,255,0.01) 60%, transparent);
-  display: grid;
-  place-items: center;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-.product-card .img-box img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  filter: drop-shadow(0 6px 16px rgba(0,0,0,0.5));
-}
-.btn-add-mobile { padding-inline: 14px; }
-
-@media (max-width: 576px) {
-  .product-card .img-box { height: 180px; }
-  .btn-add-mobile { width: 100%; } /* botón ancho completo en móvil */
-}
-
-/* ===== Carrito (móvil) ===== */
+/* ===== Carrito (móvil/desktop) ===== */
 .thumb-box {
   width: 72px; height: 72px; border-radius: 12px;
   background: rgba(255,255,255,0.03);
@@ -228,24 +231,6 @@ body { padding-top: 70px; }
 .thumb-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
 .qty-group { width: 120px; }
 
-@media (max-width: 576px) {
-  .cart-item { gap: .5rem !important; }
-  .qty-group { width: 100%; }                  /* input-group ocupa todo el ancho */
-  .right { width: 100% !important; }           /* controles a ancho completo */
-  .btn-delete { width: 100%; }                 /* Eliminar como botón de bloque */
-}
-
-/* === Alinear Expiración y CVV (igualar alturas) === */
-.form-row-eq{ align-items: stretch; }               /* columnas ocupan misma altura */
-.form-group-eq{
-  display:flex;
-  flex-direction:column;
-  height:100%;
-}
-.form-group-eq .form-label{ margin-bottom:.35rem; }
-.form-group-eq .form-text{ margin-top:.25rem; }
-
-/* === Carrito: normalizar padding/bordes de la lista evita que "se vea corrido" === */
 .cart-card .list-group{
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: .5rem;
@@ -254,36 +239,35 @@ body { padding-top: 70px; }
   border-color: rgba(255,255,255,0.08);
   padding: .75rem 1rem;
 }
-/* ==== Centrado exacto del listado del carrito ==== */
+
+/* Centrado exacto del listado del carrito */
 .cart-card .cart-list {
-  padding: 0 1rem;          /* mismo padding a izquierda y derecha */
-  border: 0;                /* sin borde del list-group, evita “corrido” */
+  padding: 0 1rem;
+  border: 0;
 }
 .cart-card .cart-list .list-group-item {
-  border: 0;                /* quitamos borde propio */
-  padding-left: 0;          /* el padding ya lo da cart-list */
+  border: 0;
+  padding-left: 0;
   padding-right: 0;
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
-.cart-card .cart-list .list-group-item:last-child {
-  border-bottom: 0;
-}
+.cart-card .cart-list .list-group-item:last-child { border-bottom: 0; }
 
-/* ===== Alinear cantidad, precio y eliminar en desktop ===== */
 @media (min-width: 577px) {
   .cart-item .right {
-    margin-left: auto;                 /* empuja a la derecha */
+    margin-left: auto;
     display: flex;
     align-items: center;
     gap: .5rem;
-    width: 370px;                      /* << mueve todo este bloque un poco a la derecha */
+    width: 370px;
   }
-  .cart-item .qty-group { width: 140px; }   /* ancho fijo del selector */
-  .cart-item .price     { width: 110px; text-align: right; } /* precio fijo */
+  .cart-item .qty-group { width: 140px; }
+  .cart-item .price { width: 110px; text-align: right; }
 }
 
-/* ===== En móvil sigue responsivo (sin cambios visuales) ===== */
 @media (max-width: 576px) {
+  .cart-item { gap: .5rem !important; }
+  .qty-group { width: 100%; }
   .cart-item .right {
     width: 100%;
     display: flex;
@@ -295,12 +279,12 @@ body { padding-top: 70px; }
   .btn-delete { width: 100%; }
 }
 
-/* (opcional) si tu lista tiene padding: lo normalizamos para centrar visualmente */
-.cart-card .cart-list { padding: 0 1rem; }
-.cart-card .cart-list .list-group-item {
-  border: 0;
-  padding-left: 0;
-  padding-right: 0;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+/* === Alinear Expiración y CVV (igualar alturas) === */
+.form-row-eq{ align-items: stretch; }
+.form-group-eq{
+  display:flex;
+  flex-direction:column;
+  height:100%;
 }
-.cart-card .cart-list .list-group-item:last-child { border-bottom: 0; }
+.form-group-eq .form-label{ margin-bottom:.35rem; }
+.form-group-eq .form-text{ margin-top:.25rem; }
