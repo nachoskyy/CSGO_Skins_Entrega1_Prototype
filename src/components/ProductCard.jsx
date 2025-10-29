@@ -1,8 +1,9 @@
+// Componentes de producto individual
 import { Store } from "../data/store";
 
 export default function ProductCard({ product }){
   const add = () => Store.addToCart(product.id, 1);
-
+  // Render
   return (
     <div className="card h-100">
       <div className="product-img">

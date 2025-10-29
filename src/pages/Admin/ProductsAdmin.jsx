@@ -1,6 +1,7 @@
+//pagina del admin en productos 
 import { useEffect, useMemo, useState } from "react";
 import { Store, subscribe } from "../../data/store";
-
+// Categorías predefinidas
 const CATEGORIAS = ["Rifles", "Pistolas", "Cuchillos", "Guantes", "Stickers"];
 
 function formatPrice(n) {
@@ -21,24 +22,24 @@ export default function ProductsAdmin() {
     offer: false,
     img: "" // opcional
   });
-
+  // cargar productos
   useEffect(() => {
     setItems(Store.list());
     const un = subscribe(() => setItems(Store.list()));
     return un;
   }, []);
-
+  // manejar cambios en el formulario
   const onChange = (e) => {
     const { name, value, type, checked } = e.target;
     setF((s) => ({ ...s, [name]: type === "checkbox" ? checked : value }));
   };
-
+  // validar creación
   const canCreate =
     f.name.trim().length >= 3 &&
     Number(f.price) > 0 &&
     f.category &&
     Number(f.stock) >= 0;
-
+  // crear producto
   const create = () => {
     if (!canCreate) return;
     const id = crypto.randomUUID();
@@ -53,7 +54,7 @@ export default function ProductsAdmin() {
     });
     setF({ name: "", price: "", category: "", stock: 0, offer: false, img: "" });
   };
-
+  // eliminar producto
   const remove = (id) => {
     if (!confirm("¿Eliminar producto?")) return;
     Store.remove(id);
@@ -69,7 +70,7 @@ export default function ProductsAdmin() {
         p.category?.toLowerCase().includes(term)
     );
   }, [items, q]);
-
+  // Render
   return (
     <div className="container mt-3">
       <h2 className="section-title">Administrar Productos</h2>

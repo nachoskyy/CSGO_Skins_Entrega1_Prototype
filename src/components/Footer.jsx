@@ -1,3 +1,4 @@
+// Componente Footer
 export default function Footer(){
   return (
     <>
@@ -18,8 +19,6 @@ export default function Footer(){
           </div>
         </div>
       </footer>
-
-      {/* FAB fijo, por encima de todo */}
       <a href="/contacto" className="help-fab" aria-label="Necesitas ayuda">
         ¿Necesitas ayuda?
       </a>

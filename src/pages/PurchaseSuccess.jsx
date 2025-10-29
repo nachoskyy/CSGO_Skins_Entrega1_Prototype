@@ -1,6 +1,6 @@
-// src/pages/PurchaseSuccess.jsx
 import { Link } from "react-router-dom";
 
+/** Página de compra exitosa */
 export default function PurchaseSuccess(){
   return (
     <div className="container mt-4">

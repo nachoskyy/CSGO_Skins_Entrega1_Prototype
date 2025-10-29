@@ -1,6 +1,6 @@
-// src/pages/PurchaseFail.jsx
 import { Link } from "react-router-dom";
 
+/** Página de compra fallida */
 export default function PurchaseFail(){
   return (
     <div className="container mt-4">

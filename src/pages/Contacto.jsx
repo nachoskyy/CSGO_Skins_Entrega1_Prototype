@@ -1,11 +1,13 @@
+// Página de contacto
 import { useState } from "react";
 import { validateEmail } from "../utils/validators";
+
 
 export default function Contacto(){
   const [f, setF] = useState({ nombre:"", email:"", mensaje:"" });
   const [sent, setSent] = useState(false);
   const [emailErr, setEmailErr] = useState("");
-
+  // Manejo de formulario
   const onChange = e => {
     const { name, value } = e.target;
     setF(s => ({ ...s, [name]: value }));
@@ -13,7 +15,7 @@ export default function Contacto(){
       setEmailErr(validateEmail(value) ? "" : "Correo inválido (usa @duocuc.cl, @outlook.com o @gmail.com)");
     }
   };
-
+  // Enviar (Simulacion)
   const enviar = (e) => {
     e.preventDefault();
     if (!validateEmail(f.email)) {
@@ -24,9 +26,10 @@ export default function Contacto(){
     setTimeout(()=> setSent(false), 3000);
     setF({ nombre:"", email:"", mensaje:"" });
   };
-
+  // Deshabilitar si hay errores
   const disabled = !f.nombre.trim() || !f.mensaje.trim() || !!emailErr || !validateEmail(f.email);
 
+  // Render
   return (
     <div className="container mt-3">
       <h2 className="section-title">Contacto</h2>
@@ -40,6 +43,7 @@ export default function Contacto(){
             </div>
             <div className="mb-2">
               <label className="form-label">Email</label>
+              {/* Validación simple de email */}
               <input
                 type="email"
                 className={`form-control bg-dark text-light border-secondary ${emailErr ? "is-invalid" : ""}`}
@@ -49,7 +53,7 @@ export default function Contacto(){
                 required
               />
               {emailErr && <div className="invalid-feedback">{emailErr}</div>}
-              {!emailErr && <div className="form-text text-secondary">Se permiten: duocuc.cl, outlook.com, gmail.com</div>}
+              {!emailErr && <div className="form-text text-secondary">Solo se permiten: duocuc.cl, outlook.com, gmail.com</div>}
             </div>
             <div className="mb-3">
               <label className="form-label">Mensaje</label>
@@ -58,7 +62,7 @@ export default function Contacto(){
             <div className="d-flex justify-content-end">
               <button className="btn btn-brand" disabled={disabled}>Enviar</button>
             </div>
-            {sent && <div className="alert alert-success mt-3">¡Mensaje enviado (simulado)!</div>}
+            {sent && <div className="alert alert-success mt-3">¡Mensaje enviado!</div>}
           </form>
         </div>
 

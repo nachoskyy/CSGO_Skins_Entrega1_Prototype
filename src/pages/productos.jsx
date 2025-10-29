@@ -1,16 +1,18 @@
-// src/pages/Products.jsx  — Catálogo responsive
+/** Página de listado de productos */
 import { useEffect, useMemo, useState } from "react";
 import { Store, subscribe } from "../data/store";
 
+// Función para obtener valores únicos de un array
 const uniq = (xs) => Array.from(new Set(xs));
 
+/** Página de productos */
 export default function Products(){
   const [items, setItems] = useState(() => {
     try { return Store.list(); } catch { return []; }
   });
   const [q, setQ] = useState("");
   const [cat, setCat] = useState("Todas");
-
+  
   useEffect(()=>{
     let un = null;
     try { un = subscribe(()=> setItems(Store.list())); } catch {}
@@ -23,9 +25,9 @@ export default function Products(){
     } catch {}
     return () => { try{ un && un(); }catch{} };
   },[]);
-
+  // Categorías
   const cats = useMemo(() => ["Todas", ...uniq((items||[]).map(p=>p.category).filter(Boolean))], [items]);
-
+  // Vista filtrada
   const view = useMemo(()=>{
     const needle = q.trim().toLowerCase();
     return (items||[])
@@ -39,13 +41,14 @@ export default function Products(){
         );
       });
   }, [items, q, cat]);
-
+  // Añadir al carrito
   const add = (id) => {
     try { Store.addToCart(id, 1); } catch {}
   };
 
   const money = (n) => `$${Number(n ?? 0).toLocaleString()}`;
-
+ 
+  // Render
   return (
     <div className="container mt-3">
       <h2 className="section-title">Productos</h2>
@@ -73,8 +76,7 @@ export default function Products(){
           </div>
         </div>
       </div>
-
-      {/* Grid responsive sin cortes en móvil */}
+      {/* Grid de productos */}
       <div className="row g-3 row-cols-1 row-cols-sm-2 row-cols-lg-4">
         {view.map(p => (
           <div className="col" key={p.id}>
@@ -88,7 +90,7 @@ export default function Products(){
               </div>
               <div className="card-body d-flex flex-column">
                 <h5 className="card-title mb-1">{p.name}</h5>
-                <div className="text-secondary small mb-2">Categoría: {p.category}</div>
+                <div className="text-secondary small mb-2">Categoria: {p.category}</div>
                 <div className="mt-auto d-flex flex-wrap gap-2 align-items-center">
                   <div className="fw-bold me-auto">{money(p.price)}</div>
                   <button className="btn btn-success btn-add-mobile" onClick={()=> add(p.id)}>Añadir</button>
