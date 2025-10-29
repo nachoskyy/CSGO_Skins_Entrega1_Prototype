@@ -12,11 +12,11 @@ export default function Home(){
         <div className="container">
           <div className="row g-3 align-items-center">
             <div className="col-12 col-lg-7">
-              <span className="hero__pill mb-2">Marketplace para evaluación 1</span>
+              <span className="hero__pill mb-2">Marketplace para evaluación 2</span>
               <h1 className="fw-bold mt-2 mb-2">Compra y vende skins de CS2</h1>
               <p className="text-secondary mb-3">Explora, compara y vende tus skins de forma rápida y segura.</p>
               <div className="d-flex gap-2 flex-wrap">
-                <a href="/categorias" className="btn btn-brand">Ver skins</a>
+                <a href="/productos" className="btn btn-brand">Ver skins</a>
                 <a href="/nosotros" className="btn btn-outline-primary">¿Cómo funciona?</a>
               </div>
             </div>

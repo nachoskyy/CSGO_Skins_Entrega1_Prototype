@@ -1,5 +1,5 @@
 // src/pages/Checkout.jsx
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   luhnCheck,
@@ -7,118 +7,104 @@ import {
   validateCVV,
   validateExpiry,
   validateEmail,
+  normalizeExpiry,
+  digitsOnly,
 } from "../utils/validators";
 import { Store } from "../data/store";
 
-function formatPrice(n){ return `$${Number(n ?? 0).toLocaleString()}`; }
+const money = (n) => `$${Number(n ?? 0).toLocaleString()}`;
 
-function readCartSmart(){
-  try{
-    if (typeof Store?.getCart === "function") return Store.getCart();
-    if (Array.isArray(Store?.cart)) return Store.cart;
-    if (Array.isArray(Store?.state?.cart)) return Store.state.cart;
-    if (typeof Store?.getState === "function" && Array.isArray(Store.getState()?.cart)) {
-      return Store.getState().cart;
-    }
-    if (Array.isArray(Store?._state?.cart)) return Store._state.cart;
-  }catch(_){}
-  try{
-    let best = [];
-    for (let i = 0; i < localStorage.length; i++){
-      const k = localStorage.key(i); if (!k) continue;
-      try{
-        const val = JSON.parse(localStorage.getItem(k) || "null");
-        if (Array.isArray(val) && val.some(x => typeof x === "object" && ("qty" in x || "cantidad" in x))){
-          if (val.length > best.length) best = val;
-        }
-      }catch(_){}
-    }
-    if (best.length) return best;
-    for (const k of ["cart","kn_cart","cart_items","knskins_cart"]){
-      const raw = localStorage.getItem(k);
-      if (raw){
-        try{ const val = JSON.parse(raw); if (Array.isArray(val)) return val; }catch(_){}
-      }
-    }
-  }catch(_){}
-  return [];
+// Hidrata el carrito para mostrar detalle correcto
+function readCartHydrated(){
+  let base = [];
+  try { base = Store.getCart(); } catch {}
+  if (!Array.isArray(base)) base = [];
+  return base.map(r => {
+    const id = Number(r.productId ?? r.id);
+    const qty = Math.max(1, Number(r.qty ?? r.cantidad ?? 1));
+    let p = null;
+    try { p = Store.getById(id); } catch {}
+    return {
+      id,
+      qty,
+      name: p?.name ?? "Producto",
+      price: Number(p?.price ?? 0),
+      img: p?.img ?? "/img/skins/AK-BLOODSPORT.png",
+    };
+  }).filter(x => x.id > 0);
 }
 
 export default function Checkout(){
   const nav = useNavigate();
-  const cart = readCartSmart();
-  const total = cart.reduce((s,it) => s + (Number(it.price ?? 0) * Number(it.qty ?? it.cantidad ?? 1)), 0);
 
-  const [form, setForm] = useState({ nombre:"", email:"", address:"", cardNumber:"", expiry:"", cvv:"" });
+  const [form, setForm] = useState({
+    nombre: "",
+    email: "",
+    direccion: "",
+    card: "",
+    exp: "",
+    cvv: ""
+  });
   const [errors, setErrors] = useState({});
   const [processing, setProcessing] = useState(false);
 
-  const change = (e)=> {
+  const items = readCartHydrated();
+  const subtotal = useMemo(()=> items.reduce((s, it) => s + Number(it.price||0) * Number(it.qty||1), 0), [items]);
+  const total = subtotal;
+
+  const onChange = (e) => {
     const { name, value } = e.target;
-    if (name === "expiry"){
-      let v = value.replace(/[^\d\/]/g,'');
-      if (v.length === 2 && !v.includes("/")) v = v + "/";
-      if (v.length > 5) v = v.slice(0,5);
-      setForm(s => ({...s, expiry: v}));
-      setErrors(s => ({...s, expiry: null}));
-      return;
+
+    if (name === "card") {
+      // Formato #### #### #### #### y máx. 16 dígitos (19 con espacios)
+      const next = normalizeCardNumber(value);
+      return setForm(f => ({...f, card: next}));
     }
-    setForm(s => ({...s, [name]: value}));
-    setErrors(s => ({...s, [name]: null}));
+
+    if (name === "exp") {
+      // Formato MM/YY, auto-slash y máx. 5 chars
+      const next = normalizeExpiry(value).slice(0, 5);
+      return setForm(f => ({...f, exp: next}));
+    }
+
+    if (name === "cvv") {
+      // Solo 3 dígitos
+      const next = digitsOnly(value).slice(0, 3);
+      return setForm(f => ({...f, cvv: next}));
+    }
+
+    setForm(f => ({...f, [name]: value}));
   };
 
-  function validateCardLength(num){ return num.length >= 13 && num.length <= 19; }
-
-  function validateAll(){
-    const e = {};
-    if (!form.nombre.trim()) e.nombre = "Ingresa nombre del titular";
-    if (!validateEmail(form.email)) e.email = "Email inválido (duocuc/outlook/gmail)";
-    if (!form.address.trim()) e.address = "Ingresa dirección";
-
-    const raw = normalizeCardNumber(form.cardNumber);
-    if (!raw) e.cardNumber = "Ingresa número de tarjeta";
-    else if (!/^\d+$/.test(raw)) e.cardNumber = "Solo dígitos";
-    else if (!validateCardLength(raw)) e.cardNumber = "Número inválido (13-19 dígitos)";
-    else if (!luhnCheck(raw)) e.cardNumber = "Número inválido (no pasa Luhn)";
-
-    if (!validateExpiry(form.expiry)) e.expiry = "Fecha inválida o vencida (MM/YY)";
-    if (!validateCVV(form.cvv)) e.cvv = "CVV inválido (3 dígitos)";
-
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  }
-
-  function clearCartSafe(){
-    try{
-      if (typeof Store?.clearCart === "function") Store.clearCart();
-      else if (typeof Store?.emptyCart === "function") Store.emptyCart();
-      else {
-        // borrar claves que parezcan carrito
-        for (let i = localStorage.length - 1; i >= 0; i--){
-          const k = localStorage.key(i);
-          try{
-            const val = JSON.parse(localStorage.getItem(k) || "null");
-            if (Array.isArray(val) && val.some(x => typeof x === "object" && ("qty" in x || "cantidad" in x))){
-              localStorage.removeItem(k);
-            }
-          }catch(_){}
-        }
-      }
-    }catch(_){}
-  }
-
-  const onSubmit = (e)=>{
+  const onSubmit = async (e) => {
     e.preventDefault();
-    if (processing) return;
-    if (!validateAll()) return;
+    const errs = {};
+
+    if (!form.nombre.trim()) errs.nombre = "Nombre requerido";
+    if (!validateEmail(form.email)) errs.email = "Email inválido o dominio no permitido";
+    if (!form.direccion.trim()) errs.direccion = "Dirección requerida";
+
+    if (!luhnCheck(form.card)) errs.card = "Tarjeta inválida (revisa los 16 dígitos)";
+    if (!validateExpiry(form.exp)) errs.exp = "Expiración inválida (usa MM/YY y que no esté vencida)";
+    if (!validateCVV(form.cvv)) errs.cvv = "CVV inválido (3 dígitos)";
+
+    setErrors(errs);
+    if (Object.keys(errs).length) return;
+
     setProcessing(true);
-    setTimeout(()=>{
-      const raw = normalizeCardNumber(form.cardNumber);
-      const rejected = raw.slice(-1) === "0"; // regla de prueba
+    try{
+      // DEMO: tarjeta termina en 0 => rechazada
+      const endsWith0 = /0$/.test(digitsOnly(form.card));
+      await new Promise(r => setTimeout(r, 800));
+      if (endsWith0) {
+        nav("/compra-fallida");
+      } else {
+        try{ Store.clearCart(); }catch{}
+        nav("/compra-exitosa");
+      }
+    } finally {
       setProcessing(false);
-      if (rejected) nav("/compra-fallida", { replace:true });
-      else { clearCartSafe(); nav("/compra-exitosa", { replace:true }); }
-    },1000);
+    }
   };
 
   return (
@@ -132,51 +118,96 @@ export default function Checkout(){
 
             <div className="mb-3">
               <label className="form-label">Nombre completo</label>
-              <input name="nombre" value={form.nombre} onChange={change} className="form-control bg-dark text-light border-secondary"/>
+              <input
+                name="nombre"
+                value={form.nombre}
+                onChange={onChange}
+                className="form-control bg-dark text-light border-secondary"
+                placeholder="Ej: Juan Pérez"
+              />
               {errors.nombre && <div className="text-danger mt-1">{errors.nombre}</div>}
             </div>
 
             <div className="mb-3">
               <label className="form-label">Email</label>
-              <input name="email" value={form.email} onChange={change} className="form-control bg-dark text-light border-secondary"/>
+              <input
+                name="email"
+                value={form.email}
+                onChange={onChange}
+                className="form-control bg-dark text-light border-secondary"
+                placeholder="usuario@duocuc.cl"
+              />
               {errors.email && <div className="text-danger mt-1">{errors.email}</div>}
-              {!errors.email && <div className="form-text text-secondary">Permitidos: duocuc.cl, outlook.com, gmail.com</div>}
+              <div className="form-text text-secondary">Permitidos: duocuc.cl, outlook.com, gmail.com</div>
             </div>
 
             <div className="mb-3">
               <label className="form-label">Dirección de facturación</label>
-              <input name="address" value={form.address} onChange={change} className="form-control bg-dark text-light border-secondary"/>
-              {errors.address && <div className="text-danger mt-1">{errors.address}</div>}
+              <input
+                name="direccion"
+                value={form.direccion}
+                onChange={onChange}
+                className="form-control bg-dark text-light border-secondary"
+                placeholder="Calle 123, Comuna, Ciudad"
+              />
+              {errors.direccion && <div className="text-danger mt-1">{errors.direccion}</div>}
             </div>
 
-            <hr className="my-3" />
-            <h5>Pago con tarjeta</h5>
+            <h5 className="mt-2">Pago con tarjeta</h5>
 
             <div className="mb-3">
               <label className="form-label">Número de tarjeta</label>
-              <input name="cardNumber" inputMode="numeric" value={form.cardNumber} onChange={change} placeholder="1234 5678 9012 3456" className="form-control bg-dark text-light border-secondary"/>
-              {errors.cardNumber && <div className="text-danger mt-1">{errors.cardNumber}</div>}
+              <input
+                name="card"
+                value={form.card}
+                onChange={onChange}
+                className="form-control bg-dark text-light border-secondary"
+                inputMode="numeric"
+                autoComplete="cc-number"
+                placeholder="1234 5678 9012 3456"
+                maxLength={19} // 16 dígitos + 3 espacios
+              />
+              {errors.card && <div className="text-danger mt-1">{errors.card}</div>}
+              <div className="form-text text-secondary">Ingresa los datos de la tarjeta.</div>
             </div>
 
-            <div className="row g-2">
-              <div className="col-6 col-md-4">
+            <div className="row g-3 align-items-end">
+              <div className="col-6">
                 <label className="form-label">Expiración (MM/YY)</label>
-                <input name="expiry" value={form.expiry} onChange={change} placeholder="04/26" className="form-control bg-dark text-light border-secondary" maxLength={5}/>
-                {errors.expiry && <div className="text-danger mt-1">{errors.expiry}</div>}
+                <input
+                  name="exp"
+                  value={form.exp}
+                  onChange={onChange}
+                  className="form-control bg-dark text-light border-secondary"
+                  inputMode="numeric"
+                  autoComplete="cc-exp"
+                  placeholder="MM/YY"
+                  maxLength={5}
+                />
+                {errors.exp && <div className="text-danger mt-1">{errors.exp}</div>}
+                <div className="form-text text-secondary">Ej: 03/28 (marzo de 2028)</div>
               </div>
-              <div className="col-6 col-md-4">
+              <div className="col-6">
                 <label className="form-label">CVV</label>
-                <input name="cvv" inputMode="numeric" value={form.cvv} onChange={change} placeholder="123" className="form-control bg-dark text-light border-secondary" maxLength={3}/>
+                <input
+                  name="cvv"
+                  value={form.cvv}
+                  onChange={onChange}
+                  className="form-control bg-dark text-light border-secondary"
+                  inputMode="numeric"
+                  autoComplete="cc-csc"
+                  placeholder="123"
+                  maxLength={3}
+                />
                 {errors.cvv && <div className="text-danger mt-1">{errors.cvv}</div>}
               </div>
-              <div className="col-12 col-md-4 align-self-end text-md-end">
-                <div className="small text-secondary">Total:</div>
-                <div className="h5">{formatPrice(total)}</div>
-              </div>
             </div>
 
-            <div className="mt-4 d-flex justify-content-end">
-              <button className="btn btn-brand" disabled={processing}>{processing ? "Procesando..." : "Pagar ahora"}</button>
+            <div className="d-flex justify-content-end align-items-center gap-3 mt-3">
+              <div className="text-secondary">Total: <span className="fw-semibold text-light">{money(total)}</span></div>
+              <button className="btn btn-brand" disabled={processing}>
+                {processing ? "Procesando..." : "Pagar ahora"}
+              </button>
             </div>
           </form>
         </div>
@@ -184,15 +215,15 @@ export default function Checkout(){
         <div className="col-lg-5">
           <div className="card p-3 bg-dark text-light border-secondary">
             <h5>Resumen del pedido</h5>
-            {cart.length === 0 ? (
+            {items.length === 0 ? (
               <div className="text-secondary">Tu carrito está vacío.</div>
             ) : (
               <div className="list-group">
-                {cart.map((it, idx)=>(
+                {items.map((it, idx)=>(
                   <div key={it.id ?? idx} className="d-flex align-items-center gap-3 py-2 border-bottom">
                     <div style={{width:56,height:56,display:"grid",placeItems:"center",overflow:"hidden",borderRadius:8,background:"rgba(255,255,255,0.03)"}}>
                       <img
-                        src={it.img || `/img/skins/${(it.imgName||"").trim()}` || "/img/skins/AK-BLOODSPORT.png"}
+                        src={it.img}
                         alt={it.name}
                         style={{maxWidth:"100%",maxHeight:"100%",objectFit:"contain"}}
                         onError={(e)=> e.currentTarget.src="/img/skins/AK-BLOODSPORT.png"}
@@ -201,17 +232,17 @@ export default function Checkout(){
                     <div style={{flex:1}}>
                       <div className="fw-semibold">{it.name}</div>
                       <div className="text-secondary small">
-                        {Number(it.qty ?? it.cantidad ?? 1)} × ${Number(it.price ?? 0).toLocaleString()}
+                        {Number(it.qty)} × {money(it.price)}
                       </div>
                     </div>
                     <div className="fw-semibold">
-                      ${ (Number(it.price ?? 0) * Number(it.qty ?? it.cantidad ?? 1)).toLocaleString() }
+                      {money(Number(it.price)*Number(it.qty))}
                     </div>
                   </div>
                 ))}
-                <div className="d-flex justify-content-between mt-3">
+                <div className="d-flex justify-content-between pt-2">
                   <div className="fw-semibold">Total</div>
-                  <div className="fw-semibold">{formatPrice(total)}</div>
+                  <div className="fw-semibold">{money(total)}</div>
                 </div>
               </div>
             )}

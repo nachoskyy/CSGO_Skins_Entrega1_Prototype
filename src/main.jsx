@@ -1,20 +1,19 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
+// src/main.jsx
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
+
+// Bootstrap CSS + JS (para navbar, grid, etc.)
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 
-// Estilos globales
-import "bootstrap/dist/css/bootstrap.min.css";
+import App from "./App.jsx";
 import "./index.css";
 
-// App principal
-import App from "./App.jsx";
-
-ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
+createRoot(document.getElementById("root")).render(
+  <StrictMode>
     <BrowserRouter>
       <App />
     </BrowserRouter>
-  </React.StrictMode>
+  </StrictMode>
 );

@@ -1,7 +1,9 @@
-// Dominios permitidos
+// src/utils/validators.js
+// Colección de validadores y normalizadores usados en toda la app.
+
+// ========================= Email =========================
 const ALLOWED_DOMAINS = ["duocuc.cl", "outlook.com", "gmail.com"];
 
-// Email válido y dominio permitido
 export function validateEmail(email) {
   if (!email) return false;
   const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -10,105 +12,148 @@ export function validateEmail(email) {
   return ALLOWED_DOMAINS.includes(domain);
 }
 
-// Password fuerte (demo)
 export function validateStrongPassword(pwd) {
   if (!pwd || pwd.length < 6) return false;
-  return /[a-z]/.test(pwd) && /[A-Z]/.test(pwd) && /[0-9]/.test(pwd) && /[^A-Za-z0-9]/.test(pwd);
+  return (
+    /[a-z]/.test(pwd) &&
+    /[A-Z]/.test(pwd) &&
+    /[0-9]/.test(pwd) &&
+    /[^A-Za-z0-9]/.test(pwd)
+  );
 }
 
-// RUT/RUN chileno: admite puntos/guion y DV k/K
-export function validateRUT(value) {
-  if (!value) return false;
-  const clean = value.toString().replace(/[^0-9kK]/g, "").toUpperCase();
-  if (clean.length < 2) return false;
-  const body = clean.slice(0, -1);
-  const dv = clean.slice(-1);
-  if (!/^\d+$/.test(body)) return false;
-
-  let sum = 0, mult = 2;
-  for (let i = body.length - 1; i >= 0; i--) {
-    sum += parseInt(body[i], 10) * mult;
-    mult = mult === 7 ? 2 : mult + 1;
-  }
-  const rest = 11 - (sum % 11);
-  const dvCalc = rest === 11 ? "0" : rest === 10 ? "K" : String(rest);
-  return dvCalc === dv;
+// ========================= Util genéricas =========================
+export function digitsOnly(str = "") {
+  return (str || "").replace(/\D/g, "");
 }
 
-// Fecha válida (no futura y >= 1900)
-export function validateDate(isoStr) {
-  if (!isoStr) return true;
-  const d = new Date(isoStr);
-  if (Number.isNaN(d.getTime())) return false;
-  const now = new Date();
-  if (d > now) return false;
-  if (d.getFullYear() < 1900) return false;
-  return true;
-}
-
-// SHA-256 (demo)
-export async function sha256(text) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(text);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  return [...new Uint8Array(hashBuffer)].map(b => b.toString(16).padStart(2, "0")).join("");
-}
-
-/* ===========================
-   Validación de tarjeta
-   =========================== */
-
-// Normaliza número: elimina espacios y guiones
-export function normalizeCardNumber(num) {
-  if (!num) return "";
-  return num.toString().replace(/\s+/g, "").replace(/-/g, "");
-}
-
-// Algoritmo Luhn (verifica número de tarjeta)
-export function luhnCheck(cardNumber) {
-  const s = normalizeCardNumber(cardNumber);
-  if (!/^\d+$/.test(s)) return false;
-  let sum = 0;
-  let alt = false;
-  for (let i = s.length - 1; i >= 0; i--) {
-    let n = parseInt(s[i], 10);
-    if (alt) {
-      n *= 2;
-      if (n > 9) n -= 9;
-    }
-    sum += n;
-    alt = !alt;
+// ========================= Tarjeta (Luhn + formatos) =========================
+export function luhnCheck(value) {
+  const num = digitsOnly(value);
+  if (num.length < 12) return false;
+  let sum = 0, dbl = false;
+  for (let i = num.length - 1; i >= 0; i--) {
+    let d = Number(num[i]);
+    if (dbl) { d *= 2; if (d > 9) d -= 9; }
+    sum += d; dbl = !dbl;
   }
   return sum % 10 === 0;
 }
 
-// Validación mínima de longitud por tipo (opcional) — aceptamos 13..19 dígitos comúnmente
-export function validateCardLength(cardNumber) {
-  const s = normalizeCardNumber(cardNumber);
-  return s.length >= 13 && s.length <= 19;
+/** 1234 5678 9012 3456 – agrupa cada 4 y limita a 16 dígitos */
+export function normalizeCardNumber(input) {
+  const raw = digitsOnly(input).slice(0, 16);
+  return raw.replace(/(.{4})/g, "$1 ").trim();
 }
 
-// CVV: exactamente 3 dígitos (tarjetas comunes). Si quieres AMEX usar 4.
-export function validateCVV(cvv) {
-  if (!cvv) return false;
-  return /^[0-9]{3}$/.test(cvv);
+/** CVV de 3 dígitos */
+export function validateCVV(value) {
+  return /^\d{3}$/.test(String(value || "").trim());
 }
 
-// validateExpiry para formato MM/YY (solo números)
-// acepta "MM/YY" (ej. "04/26"). Comprueba que no esté vencida.
-export function validateExpiry(value){
-  if(!value) return false;
-  const v = value.trim();
-  if(!/^\d{2}\/\d{2}$/.test(v)) return false;
+// ========================= Expiración (MM/YY) =========================
+/** Normaliza a MM/YY con autoinserción de "/" y máx 5 chars */
+export function normalizeExpiry(input) {
+  const raw = digitsOnly(input).slice(0, 4); // MMYY
+  if (raw.length <= 2) return raw;
+  return `${raw.slice(0, 2)}/${raw.slice(2)}`;
+}
+
+/** Valida que MM/YY sea correcto y no esté vencido (válido hasta fin de mes) */
+export function validateExpiry(value) {
+  if (!value) return false;
+  const v = String(value).trim();
+  if (!/^\d{2}\/\d{2}$/.test(v)) return false;
+
   const [mmStr, yyStr] = v.split("/");
   const mm = Number(mmStr);
   const yy = Number(yyStr);
-  if(mm < 1 || mm > 12) return false;
-  // año = 2000 + yy (dos dígitos)
+  if (mm < 1 || mm > 12) return false;
+
   const year = 2000 + yy;
-  // Fecha de expiración: último día del mes => comprobamos primer día del mes siguiente
-  const exp = new Date(year, mm, 1); // mes indexado 0 => mm -> month+1 => usamos mm
+  // Primer día del mes siguiente (si es > now, la tarjeta sigue válida)
+  const firstOfNextMonth = new Date(year, mm, 1);
   const now = new Date();
-  // Si exp debe ser strictly greater than now (aún válido si mes actual no pasó)
-  return exp > now;
+  return firstOfNextMonth > now;
+}
+
+// ========================= Fecha genérica =========================
+/**
+ * Valida una fecha razonable en formato "YYYY-MM-DD" o "DD/MM/YYYY".
+ * - año entre 1900 y 2099
+ * - día y mes coherentes (considera meses de 30/31 y feb)
+ */
+export function validateDate(value) {
+  if (!value) return false;
+  const v = String(value).trim();
+
+  let y, m, d;
+  const iso = /^(\d{4})-(\d{2})-(\d{2})$/;
+  const latam = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+
+  if (iso.test(v)) {
+    const [, yy, mm, dd] = v.match(iso);
+    y = Number(yy); m = Number(mm); d = Number(dd);
+  } else if (latam.test(v)) {
+    const [, dd, mm, yy] = v.match(latam);
+    y = Number(yy); m = Number(mm); d = Number(dd);
+  } else {
+    return false;
+  }
+
+  if (y < 1900 || y > 2099) return false;
+  if (m < 1 || m > 12) return false;
+
+  const daysInMonth = new Date(y, m, 0).getDate();
+  if (d < 1 || d > daysInMonth) return false;
+
+  return true;
+}
+
+// ========================= RUT Chile =========================
+/** Limpia a "XXXXXXXX-D" (sin puntos, guión opcional) */
+export function normalizeRUT(input) {
+  if (input == null) return "";
+  const s = String(input).toUpperCase().replace(/[^0-9Kk]/g, "");
+  // si tiene DV al final, separar
+  const body = s.slice(0, -1);
+  const dv = s.slice(-1);
+  if (!body) return "";
+  return `${Number(body)}-${dv}`;
+}
+
+/** Calcula dígito verificador a partir del cuerpo numérico */
+export function computeRUTDv(body) {
+  const clean = String(body).replace(/\D/g, "");
+  let sum = 0, mul = 2;
+  for (let i = clean.length - 1; i >= 0; i--) {
+    sum += Number(clean[i]) * mul;
+    mul = (mul === 7) ? 2 : mul + 1;
+  }
+  const res = 11 - (sum % 11);
+  if (res === 11) return "0";
+  if (res === 10) return "K";
+  return String(res);
+}
+
+/** Valida RUT (cuerpo + DV) en formatos: "12345678-5", "12.345.678-5", "123456785" */
+export function validateRUT(rut) {
+  if (!rut) return false;
+  const s = String(rut).toUpperCase().replace(/[^0-9K]/g, "");
+  if (s.length < 2) return false;
+  const body = s.slice(0, -1);
+  const dv = s.slice(-1);
+  if (!/^\d+$/.test(body)) return false;
+  const expected = computeRUTDv(body);
+  return dv === expected;
+}
+
+// ========================= Hash (para Auth.jsx, etc.) =========================
+/** sha256(text) -> hex string (usa WebCrypto) */
+export async function sha256(text) {
+  const enc = new TextEncoder().encode(String(text ?? ""));
+  const buf = await crypto.subtle.digest("SHA-256", enc);
+  return Array.from(new Uint8Array(buf))
+    .map(b => b.toString(16).padStart(2, "0"))
+    .join("");
 }

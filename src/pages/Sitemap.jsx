@@ -30,7 +30,7 @@ export default function SiteMap() {
         <h5 className="text-brand mb-2">Navegación</h5>
         <ul className="mb-0">
           <li><Link to="/">Inicio</Link></li>
-          <li><Link to="/categorias">Productos / Categorías</Link></li>
+          <li><Link to="/productos">Productos</Link></li>
           <li><Link to="/blog">Blogs</Link></li>
           <li><Link to="/nosotros">Nosotros (¿Cómo funciona?)</Link></li>
           <li><Link to="/contacto">Contacto</Link></li>
