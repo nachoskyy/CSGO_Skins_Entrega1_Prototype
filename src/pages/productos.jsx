@@ -1,6 +1,5 @@
-// src/pages/Products.jsx  — Catálogo de productos
+// src/pages/Products.jsx  — Catálogo responsive
 import { useEffect, useMemo, useState } from "react";
-import ProductCard from "../components/ProductCard";
 import { Store, subscribe } from "../data/store";
 
 const uniq = (xs) => Array.from(new Set(xs));
@@ -13,10 +12,8 @@ export default function Products(){
   const [cat, setCat] = useState("Todas");
 
   useEffect(()=>{
-    // Mantener en vivo si cambian productos
     let un = null;
     try { un = subscribe(()=> setItems(Store.list())); } catch {}
-    // Semilla/fallback si lista viene vacía
     try {
       const now = Store.list();
       if (!now || now.length === 0) {
@@ -43,13 +40,19 @@ export default function Products(){
       });
   }, [items, q, cat]);
 
+  const add = (id) => {
+    try { Store.addToCart(id, 1); } catch {}
+  };
+
+  const money = (n) => `$${Number(n ?? 0).toLocaleString()}`;
+
   return (
     <div className="container mt-3">
       <h2 className="section-title">Productos</h2>
 
       <div className="card p-3 bg-dark text-light border-secondary mb-3">
         <div className="row g-3 align-items-end">
-          <div className="col-md-6">
+          <div className="col-12 col-sm-6">
             <label className="form-label">Buscar</label>
             <input
               className="form-control bg-dark text-light border-secondary"
@@ -58,7 +61,7 @@ export default function Products(){
               onChange={e=> setQ(e.target.value)}
             />
           </div>
-          <div className="col-md-4">
+          <div className="col-12 col-sm-4">
             <label className="form-label">Categoría</label>
             <select
               className="form-select bg-dark text-light border-secondary"
@@ -71,10 +74,27 @@ export default function Products(){
         </div>
       </div>
 
-      <div className="row g-3">
+      {/* Grid responsive sin cortes en móvil */}
+      <div className="row g-3 row-cols-1 row-cols-sm-2 row-cols-lg-4">
         {view.map(p => (
-          <div className="col-6 col-md-4 col-lg-3" key={p.id}>
-            <ProductCard product={p} />
+          <div className="col" key={p.id}>
+            <div className="card product-card bg-dark text-light border-secondary h-100">
+              <div className="img-box">
+                <img
+                  src={p.img}
+                  alt={p.name}
+                  onError={(e)=>{ e.currentTarget.src="/img/skins/AK-BLOODSPORT.png"; }}
+                />
+              </div>
+              <div className="card-body d-flex flex-column">
+                <h5 className="card-title mb-1">{p.name}</h5>
+                <div className="text-secondary small mb-2">Categoría: {p.category}</div>
+                <div className="mt-auto d-flex flex-wrap gap-2 align-items-center">
+                  <div className="fw-bold me-auto">{money(p.price)}</div>
+                  <button className="btn btn-success btn-add-mobile" onClick={()=> add(p.id)}>Añadir</button>
+                </div>
+              </div>
+            </div>
           </div>
         ))}
         {view.length === 0 && (
