@@ -144,7 +144,7 @@ export default function Auth(){
           <h5 className="mb-3">Registro</h5>
           <form onSubmit={onRegister} className="row g-3">
             <div className="col-md-4">
-              <label className="form-label">RUN (19.011.022-K o 19011022K)</label>
+              <label className="form-label">RUN (20.388.360-9 o 20388360-9)</label>
               <input className="form-control bg-dark text-light border-secondary" name="run" value={f.run} onChange={change} required />
               {errors.run && <div className="text-danger">{errors.run}</div>}
             </div>
