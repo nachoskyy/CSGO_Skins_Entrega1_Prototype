@@ -1,13 +1,13 @@
-// colección de datos simulada con LocalStorage
+// src/data/store.js
 const DB_VERSION = 2;
 const VER_KEY   = "tienda-react-version";
 const KEY       = "tienda-react-products";
 const CART_KEY  = "tienda-react-cart";
 
-// Productos 
+// Productos de ejemplo (coinciden con /public/img/skins/)
 const seed = [
-  { id: 1, name: "AK-47 | Bloodsport",    price: 100000,  category: "Rifles",    offer:false, stock: 8, img:"/img/skins/AK-BLOODSPORT.png" },
-  { id: 2, name: "AWP | Dragon",          price: 600000, category: "Rifles",    offer:false, stock: 1, img:"/img/skins/AWP-DRAGON.png" },
+  { id: 1, name: "AK-47 | Bloodsport",    price: 45000,  category: "Rifles",    offer:false, stock: 8, img:"/img/skins/AK-BLOODSPORT.png" },
+  { id: 2, name: "AWP | Dragon",          price: 300000, category: "Rifles",    offer:false, stock: 1, img:"/img/skins/AWP-DRAGON.png" },
   { id: 3, name: "M4A4 | Desolate Space", price: 80000,  category: "Rifles",    offer:true,  stock: 4, img:"/img/skins/M4A4-DESOLATE.png" },
   { id: 4, name: "Karambit | Fade",       price: 500000, category: "Cuchillos", offer:true,  stock: 2, img:"/img/skins/KARAMBIT-FADE.png" },
   { id: 5, name: "Bayonet | Urban Masked",price: 120000, category: "Cuchillos", offer:false, stock: 3, img:"/img/skins/BAYONET-URBAN.png" },
@@ -27,26 +27,25 @@ function writeLS(key, value){
   try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
 }
 
-// Sistema de listeners para cambios en el Store
+// Pub/Sub simple
 const listeners = new Set();
 function emit(){ listeners.forEach(fn => { try{ fn(); }catch{} }); }
 export function subscribe(fn){ listeners.add(fn); return () => listeners.delete(fn); }
 
 // Init de datos y carrito
-(function init(){ 
-  const v = Number(readLS(VER_KEY, 0)); // leer versión
-  const data = readLS(KEY, null); // leer datos
-  if (!Array.isArray(data) || v !== DB_VERSION){ // inicializar datos
-    writeLS(KEY, seed); // resembrar
-    writeLS(VER_KEY, DB_VERSION); // actualizar versión
+(function init(){
+  const v = Number(readLS(VER_KEY, 0));
+  const data = readLS(KEY, null);
+  if (!Array.isArray(data) || v !== DB_VERSION){
+    writeLS(KEY, seed);
+    writeLS(VER_KEY, DB_VERSION);
   }
-  if (!Array.isArray(readLS(CART_KEY, null))){ // inicializar carrito
-    writeLS(CART_KEY, []); // carrito vacío
+  if (!Array.isArray(readLS(CART_KEY, null))){
+    writeLS(CART_KEY, []);
   }
 })();
 
-// Métodos para manipular productos y carrito
-export const Store = {// Productos
+export const Store = {
   list(){ return readLS(KEY, []); },
   getById(id){
     const d = readLS(KEY, []);
@@ -61,45 +60,45 @@ export const Store = {// Productos
     writeLS(KEY, data); emit();
     return data[i];
   },
-  create(p){ // retorna el producto creado
+  create(p){
     const data = readLS(KEY, []);
     const id = data.length ? Math.max(...data.map(x=>x.id))+1 : 1;
     const row = { id, stock:0, offer:false, ...p };
     data.push(row); writeLS(KEY, data); emit();
     return row;
   },
-  remove(id){ // elimina por id
+  remove(id){
     const data = readLS(KEY, []).filter(p=>p.id!==Number(id));
     writeLS(KEY, data); emit();
   },
 
   // Carrito
   getCart(){
-    const raw = readLS(CART_KEY, []); 
-    if (!Array.isArray(raw)) return []; 
+    const raw = readLS(CART_KEY, []);
+    if (!Array.isArray(raw)) return [];
     return raw.map(r => ({
       productId: Number(r.productId ?? r.id),
       qty: Math.max(1, Number(r.qty ?? r.cantidad ?? 1))
     })).filter(r => r.productId>0 && r.qty>0);
   },
-  addToCart(productId, qty=1){ // añade cantidad
+  addToCart(productId, qty=1){
     const cart = Store.getCart();
     const i = cart.findIndex(c=>c.productId===Number(productId));
     if (i<0) cart.push({ productId:Number(productId), qty:Number(qty)||1 });
     else cart[i].qty += (Number(qty)||1);
-    writeLS(CART_KEY, cart); emit(); // emitir cambio
+    writeLS(CART_KEY, cart); emit();
   },
-  updateQty(productId, qty){ // setear cantidad
-    const q = Math.max(1, Number(qty)||1); // mínimo 1
-    const cart = Store.getCart().map(c => c.productId===Number(productId) ? ({...c, qty:q}) : c); // actualizar
-    writeLS(CART_KEY, cart); emit(); // emitir cambio
+  updateQty(productId, qty){
+    const q = Math.max(1, Number(qty)||1);
+    const cart = Store.getCart().map(c => c.productId===Number(productId) ? ({...c, qty:q}) : c);
+    writeLS(CART_KEY, cart); emit();
   },
-  removeFromCart(productId){ // eliminar del carrito
-    writeLS(CART_KEY, Store.getCart().filter(c=>c.productId!==Number(productId))); emit(); // emitir cambio
+  removeFromCart(productId){
+    writeLS(CART_KEY, Store.getCart().filter(c=>c.productId!==Number(productId))); emit();
   },
-  clearCart(){ // vaciar carrito
-    writeLS(CART_KEY, []); emit(); // emitir cambio
+  clearCart(){
+    writeLS(CART_KEY, []); emit();
   },
-  // Re-sembrar datos
+
   reseed(){ writeLS(KEY, seed); writeLS(VER_KEY, DB_VERSION); emit(); }
 };

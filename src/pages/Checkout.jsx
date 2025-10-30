@@ -1,4 +1,4 @@
-// Página de checkout / pago
+// src/pages/Checkout.jsx
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -12,10 +12,9 @@ import {
 } from "../utils/validators";
 import { Store } from "../data/store";
 
-// Formatea número a formato moneda
 const money = (n) => `$${Number(n ?? 0).toLocaleString()}`;
 
-// Lee el carrito y lo "hidrata" con datos de productos
+// Hidrata el carrito para mostrar detalle correcto
 function readCartHydrated(){
   let base = [];
   try { base = Store.getCart(); } catch {}
@@ -37,7 +36,7 @@ function readCartHydrated(){
 
 export default function Checkout(){
   const nav = useNavigate();
-  // Formulario
+
   const [form, setForm] = useState({
     nombre: "",
     email: "",
@@ -46,14 +45,13 @@ export default function Checkout(){
     exp: "",
     cvv: ""
   });
-  // Errores de validación
   const [errors, setErrors] = useState({});
   const [processing, setProcessing] = useState(false);
-  // Carrito
+
   const items = readCartHydrated();
   const subtotal = useMemo(()=> items.reduce((s, it) => s + Number(it.price||0) * Number(it.qty||1), 0), [items]);
   const total = subtotal;
-  // Actualiza y normaliza según el campo
+
   const onChange = (e) => {
     const { name, value } = e.target;
 
@@ -71,11 +69,11 @@ export default function Checkout(){
     }
     setForm(f => ({...f, [name]: value}));
   };
-  // Envía el formulario
+
   const onSubmit = async (e) => {
     e.preventDefault();
     const errs = {};
-    // Validaciones
+
     if (!form.nombre.trim()) errs.nombre = "Nombre requerido";
     if (!validateEmail(form.email)) errs.email = "Email inválido o dominio no permitido";
     if (!form.direccion.trim()) errs.direccion = "Dirección requerida";
@@ -83,12 +81,13 @@ export default function Checkout(){
     if (!luhnCheck(form.card)) errs.card = "Tarjeta inválida (revisa los 16 dígitos)";
     if (!validateExpiry(form.exp)) errs.exp = "Expiración inválida (usa MM/YY y que no esté vencida)";
     if (!validateCVV(form.cvv)) errs.cvv = "CVV inválido (3 dígitos)";
-    // Si hay errores, no continuar
+
     setErrors(errs);
     if (Object.keys(errs).length) return;
+
     setProcessing(true);
     try{
-      // Demito: tarjeta termina en 0 => rechazada
+      // DEMO: tarjeta termina en 0 => rechazada
       const endsWith0 = /0$/.test(digitsOnly(form.card));
       await new Promise(r => setTimeout(r, 800));
       if (endsWith0) {
@@ -101,7 +100,7 @@ export default function Checkout(){
       setProcessing(false);
     }
   };
-  // Render
+
   return (
     <div className="container mt-3">
       <h2 className="section-title">Checkout</h2>

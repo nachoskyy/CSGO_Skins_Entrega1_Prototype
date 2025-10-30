@@ -1,11 +1,10 @@
-// Página del carrito de compras
+// src/pages/Cart.jsx — Alinea cantidad, precio y eliminar sin cambiar el estilo
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Store, subscribe } from "../data/store";
 
 const money = (n) => `$${Number(n ?? 0).toLocaleString()}`;
 
-// Leer el carrito con datos hidratados
 function readCartHydrated(){
   let base = [];
   try { base = Store.getCart(); } catch {}
@@ -35,29 +34,29 @@ export default function Cart(){
     setItems(readCartHydrated());
     return () => { try{ un && un(); }catch{} };
   },[]);
-  // Actualizar cantidad
+
   const updateQty = (id, qty) => {
     const q = Math.max(1, Number(qty||1));
     try{ Store.updateQty(id, q); } catch {}
     setItems(readCartHydrated());
   };
-  // Eliminar item
+
   const remove = (id) => {
     try{ Store.removeFromCart(id); } catch {}
     setItems(readCartHydrated());
   };
-  // Vaciar carrito
+
   const clear = () => {
     if (!confirm("Vaciar carrito?")) return;
     try{ Store.clearCart(); } catch {}
     setItems([]);
   };
-  // Subtotal
+
   const subtotal = useMemo(
     () => items.reduce((s,it) => s + Number(it.price||0) * Number(it.qty||1), 0),
     [items]
   );
-  // Render
+
   return (
     <div className="container mt-3">
       <h2 className="section-title">Carrito</h2>
@@ -88,7 +87,7 @@ export default function Cart(){
                       <div className="text-secondary small">{it.category}</div>
                     </div>
 
-                    {/* Controles a la derecha */}
+                    {/* Controles a la derecha (sin cambiar look) */}
                     <div className="right">
                       <div className="input-group input-group-sm qty-group">
                         <button className="btn btn-outline-secondary" onClick={()=> updateQty(it.id, it.qty-1)}>-</button>
@@ -101,11 +100,11 @@ export default function Cart(){
                         />
                         <button className="btn btn-outline-secondary" onClick={()=> updateQty(it.id, it.qty+1)}>+</button>
                       </div>
-                      {/* Precio total del item */}
+
                       <div className="fw-semibold text-nowrap price">
                         {money(it.price * it.qty)}
                       </div>
-                      {/* Eliminar */}
+
                       <button className="btn btn-outline-danger btn-sm btn-delete" onClick={()=> remove(it.id)}>
                         Eliminar
                       </button>
@@ -114,7 +113,7 @@ export default function Cart(){
                 </div>
               ))}
             </div>
-            {/* Controles Carrito */}
+
             <div className="mt-3 d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-center gap-3">
               <button className="btn btn-outline-secondary" onClick={clear}>Vaciar carrito</button>
 

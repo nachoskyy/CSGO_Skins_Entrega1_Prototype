@@ -1,26 +1,25 @@
-// Barra de navegación
 import { Link, NavLink } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Store, subscribe } from "../data/store";
 
 export default function Navbar(){
   const [count, setCount] = useState(0);
-  
-  useEffect(()=>{ 
-    const recalc = () => { 
+
+  useEffect(()=>{
+    const recalc = () => {
       try{
-        const cart = Store.getCart(); // leer carrito
-        const c = Array.isArray(cart) ? cart.reduce((s,x)=> s + Number(x.qty||1), 0) : 0; // sumar cantidades
-        setCount(Number.isFinite(c) ? c : 0); // actualizar estado
-      }catch{ setCount(0); } // en error, cero
+        const cart = Store.getCart();
+        const c = Array.isArray(cart) ? cart.reduce((s,x)=> s + Number(x.qty||1), 0) : 0;
+        setCount(Number.isFinite(c) ? c : 0);
+      }catch{ setCount(0); }
     };
     recalc();
     const un = subscribe(recalc);
     return () => { try{ un && un(); }catch{} };
   },[]);
-  // Clase para link activo
+
   const linkClass = ({ isActive }) => "nav-link px-3" + (isActive ? " active" : "");
-  // Render
+
   return (
     <nav className="navbar navbar-expand-lg navbar-dark fixed-top navbar-glass">
       <div className="container">

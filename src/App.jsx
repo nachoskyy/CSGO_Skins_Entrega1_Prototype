@@ -1,3 +1,4 @@
+// src/App.jsx
 import { Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
@@ -9,10 +10,13 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import PurchaseSuccess from "./pages/PurchaseSuccess";
 import PurchaseFail from "./pages/PurchaseFail";
+
+// Mantener estas
 import SiteMap from "./pages/Sitemap";
 import Dashboard from "./pages/Admin/Dashboard";
 import ProductsAdmin from "./pages/Admin/ProductsAdmin";
 import OrdersAdmin from "./pages/Admin/OrdersAdmin";
+
 import Blog from "./pages/Blog";
 import Nosotros from "./pages/Nosotros";
 import Contacto from "./pages/Contacto";
@@ -25,6 +29,8 @@ export default function App() {
       <div className="content">
         <Routes>
           <Route path="/" element={<Home />} />
+
+          {/* Catálogo unificado en /productos */}
           <Route path="/productos" element={<Products />} />
 
           {/* Flujo de compra */}
@@ -38,6 +44,8 @@ export default function App() {
           <Route path="/nosotros" element={<Nosotros />} />
           <Route path="/contacto" element={<Contacto />} />
           <Route path="/auth" element={<Auth />} />
+
+          {/* Mantener Sitemap y Admin */}
           <Route path="/mapa-del-sitio" element={<SiteMap />} />
           <Route path="/admin" element={<Dashboard />} />
           <Route path="/admin/productos" element={<ProductsAdmin />} />

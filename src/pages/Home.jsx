@@ -1,11 +1,10 @@
-/** Página de inicio */
 import ProductCard from "../components/ProductCard";
 import { Store } from "../data/store";
 import Carousel from "../components/Carousel";
 
 export default function Home(){
   const destacados = Store.list();
-  // Render
+
   return (
     <>
       <section className="hero mt-3">
@@ -13,7 +12,6 @@ export default function Home(){
         <div className="container">
           <div className="row g-3 align-items-center">
             <div className="col-12 col-lg-7">
-              {/* Texto principal */}
               <span className="hero__pill mb-2">Marketplace para evaluación 2</span>
               <h1 className="fw-bold mt-2 mb-2">Compra y vende skins de CS2</h1>
               <p className="text-secondary mb-3">Explora, compara y vende tus skins de forma rápida y segura.</p>
@@ -22,7 +20,6 @@ export default function Home(){
                 <a href="/nosotros" className="btn btn-outline-primary">¿Cómo funciona?</a>
               </div>
             </div>
-            {/* Banner */}
             <div className="col-12 col-lg-5">
               <div className="card" style={{overflow:"hidden"}}>
                 <img src="/img/banner.png" alt="banner" onError={(e)=>{e.currentTarget.style.display='none';}}/>
@@ -31,10 +28,9 @@ export default function Home(){
           </div>
         </div>
       </section>
-      {/* Productos destacados */}
+
       <div className="container">
         <h2 className="section-title">Destacados</h2>
-        {/* Carrusel de productos destacados */}
         <Carousel>
           {destacados.map(p => (
             <div key={p.id} className="col">

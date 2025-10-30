@@ -1,9 +1,9 @@
+// src/utils/validators.js
 // Colección de validadores y normalizadores usados en toda la app.
 
-// Correos permitidos
+// ========================= Email =========================
 const ALLOWED_DOMAINS = ["duocuc.cl", "outlook.com", "gmail.com"];
 
-/** Valida email con formato básico y dominios permitidos */
 export function validateEmail(email) {
   if (!email) return false;
   const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -11,7 +11,7 @@ export function validateEmail(email) {
   const domain = email.split("@")[1].toLowerCase();
   return ALLOWED_DOMAINS.includes(domain);
 }
-/** Valida contraseña fuerte: min 6 letras, mayuscula, minuscula, numero y simbolo */
+
 export function validateStrongPassword(pwd) {
   if (!pwd || pwd.length < 6) return false;
   return (
@@ -22,12 +22,12 @@ export function validateStrongPassword(pwd) {
   );
 }
 
-/** Devuelve solo los dígitos de un string */
+// ========================= Util genéricas =========================
 export function digitsOnly(str = "") {
   return (str || "").replace(/\D/g, "");
 }
 
-/** Valida número de tarjeta */
+// ========================= Tarjeta (Luhn + formatos) =========================
 export function luhnCheck(value) {
   const num = digitsOnly(value);
   if (num.length < 12) return false;
@@ -40,7 +40,7 @@ export function luhnCheck(value) {
   return sum % 10 === 0;
 }
 
-/** agrupa cada 4  numeros y limita a 16 dígitos para el num de la tarjeta*/
+/** 1234 5678 9012 3456 – agrupa cada 4 y limita a 16 dígitos */
 export function normalizeCardNumber(input) {
   const raw = digitsOnly(input).slice(0, 16);
   return raw.replace(/(.{4})/g, "$1 ").trim();
@@ -51,8 +51,8 @@ export function validateCVV(value) {
   return /^\d{3}$/.test(String(value || "").trim());
 }
 
-//  Expiración Tarjeta 
-/** Normaliza a MM/YY con autoinserción de "/" y máx 5 caracteres */
+// ========================= Expiración (MM/YY) =========================
+/** Normaliza a MM/YY con autoinserción de "/" y máx 5 chars */
 export function normalizeExpiry(input) {
   const raw = digitsOnly(input).slice(0, 4); // MMYY
   if (raw.length <= 2) return raw;
@@ -77,7 +77,12 @@ export function validateExpiry(value) {
   return firstOfNextMonth > now;
 }
 
-/** Valida fecha en formatos ISO (YYYY-MM-DD) o LATAM (DD/MM/YYYY), años 1900-2099 */
+// ========================= Fecha genérica =========================
+/**
+ * Valida una fecha razonable en formato "YYYY-MM-DD" o "DD/MM/YYYY".
+ * - año entre 1900 y 2099
+ * - día y mes coherentes (considera meses de 30/31 y feb)
+ */
 export function validateDate(value) {
   if (!value) return false;
   const v = String(value).trim();
@@ -105,8 +110,8 @@ export function validateDate(value) {
   return true;
 }
 
-// RUT Chileno
-/** Normaliza RUT a formato "12345678-5" */ 
+// ========================= RUT Chile =========================
+/** Limpia a "XXXXXXXX-D" (sin puntos, guión opcional) */
 export function normalizeRUT(input) {
   if (input == null) return "";
   const s = String(input).toUpperCase().replace(/[^0-9Kk]/g, "");
@@ -143,7 +148,8 @@ export function validateRUT(rut) {
   return dv === expected;
 }
 
-// Hash (para Auth.jsx, etc.)
+// ========================= Hash (para Auth.jsx, etc.) =========================
+/** sha256(text) -> hex string (usa WebCrypto) */
 export async function sha256(text) {
   const enc = new TextEncoder().encode(String(text ?? ""));
   const buf = await crypto.subtle.digest("SHA-256", enc);

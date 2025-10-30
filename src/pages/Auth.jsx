@@ -1,8 +1,7 @@
-// Página de autenticación (login y registro)
 import { useEffect, useMemo, useState } from "react";
 import { validateEmail, validateStrongPassword, validateRUT, validateDate, sha256 } from "../utils/validators";
 
-// Algunas regiones y comunas de Chile
+// Regiones y comunas (ampliado)
 const REGIONES = [
   { name: "Arica y Parinacota", comunas: ["Arica", "Camarones", "Putre", "General Lagos"] },
   { name: "Tarapacá", comunas: ["Iquique", "Alto Hospicio", "Pozo Almonte"] },
@@ -21,24 +20,24 @@ const REGIONES = [
   { name: "Aysén", comunas: ["Coyhaique", "Puerto Aysén"] },
   { name: "Magallanes", comunas: ["Punta Arenas", "Puerto Natales"] },
 ];
-// Usuarios y sesión
+
 const USERS_KEY = "tienda-react-users";
 const SESSION_KEY = "tienda-react-session";
-// Leer y escribir usuarios
+
 function readUsers(){ try { return JSON.parse(localStorage.getItem(USERS_KEY)) ?? []; } catch { return []; } }
 function writeUsers(list){ localStorage.setItem(USERS_KEY, JSON.stringify(list)); }
 function saveSession(email){ localStorage.setItem(SESSION_KEY, JSON.stringify({ email, at: Date.now() })); }
 function clearSession(){ localStorage.removeItem(SESSION_KEY); }
-// Componente principal
+
 export default function Auth(){
   const [tab, setTab] = useState("login"); // "login" | "register"
   const [users, setUsers] = useState(readUsers());
 
-  // LOGIN 
+  // ===== LOGIN =====
   const [login, setLogin] = useState({ email:"", password:"" });
   const [loginErr, setLoginErr] = useState("");
 
-  // REGISTER
+  // ===== REGISTER =====
   const [f, setF] = useState({
     run:"", nombres:"", apellidos:"", email:"", fecha:"", region:"", comuna:"", direccion:"", password:""
   });
@@ -50,7 +49,7 @@ export default function Auth(){
   const changeLogin = e => setLogin(s => ({...s, [e.target.name]: e.target.value}));
   const change = e => setF(s => ({...s, [e.target.name]: e.target.value}));
 
-  // VALIDACIÓN REGISTRO 
+  // ===== VALIDACIÓN REGISTRO =====
   const validateRegister = () => {
     const e = {};
     if (!validateRUT(f.run)) e.run = "RUN inválido. Ej: 19.011.022-K o 19011022K";
@@ -66,14 +65,14 @@ export default function Auth(){
     return Object.keys(e).length === 0;
   };
 
-  // Registro
+  // ===== SUBMITS =====
   const onRegister = async (ev) => {
     ev.preventDefault();
     if (!validateRegister()) return;
-    // Verificar si ya existe email
+
     const exists = users.some(u => u.email.toLowerCase() === f.email.toLowerCase());
     if (exists) { setErrors({ email: "Ya existe una cuenta con este correo." }); return; }
-    // Crear usuario
+
     const hashed = await sha256(f.password);
     const newUser = { ...f, email: f.email.toLowerCase(), password: hashed, createdAt: Date.now() };
     const next = [...users, newUser];
@@ -85,24 +84,24 @@ export default function Auth(){
     setLogin({ email: newUser.email, password: "" });
     alert("Cuenta creada. Ahora puedes iniciar sesión.");
   };
-  // Login
+
   const onLogin = async (ev) => {
     ev.preventDefault();
     setLoginErr("");
-    // Validar campos
+
     if (!validateEmail(login.email)) { setLoginErr("Correo inválido o dominio no permitido."); return; }
     if (!login.password) { setLoginErr("Ingresa tu contraseña."); return; }
-    // Buscar usuario
+
     const hashed = await sha256(login.password);
     const u = users.find(x => x.email.toLowerCase() === login.email.toLowerCase());
     if (!u || u.password !== hashed) { setLoginErr("Credenciales incorrectas."); return; }
-    // Guardar sesión
+
     saveSession(u.email);
     alert("Inicio de sesión correcto.");
   };
-  // Logout (demito)
+
   const logout = () => { clearSession(); alert("Sesión cerrada."); };
-  // Render
+
   return (
     <div className="container mt-3">
       <h2 className="section-title">Acceso</h2>
@@ -113,7 +112,7 @@ export default function Auth(){
         <button className={`btn btn-${tab==='register'?'brand':'outline-primary'}`} onClick={()=>setTab("register")}>Registro</button>
       </div>
 
-      {/* LOGIN */}
+      {/* ==== LOGIN ==== */}
       {tab === "login" && (
         <div className="card p-3 bg-dark text-light border-secondary">
           <h5 className="mb-3">Inicio de sesión</h5>
@@ -138,7 +137,7 @@ export default function Auth(){
         </div>
       )}
 
-      {/* REGISTRO */}
+      {/* ==== REGISTRO ==== */}
       {tab === "register" && (
         <div className="card p-3 bg-dark text-light border-secondary">
           <h5 className="mb-3">Registro</h5>

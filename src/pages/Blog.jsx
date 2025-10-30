@@ -1,6 +1,5 @@
-// Pagina de blogs
+// src/pages/Blog.jsx
 export default function Blog(){
-  // Datos de posts 
   const posts = [
     {
       id: 1,
@@ -21,7 +20,7 @@ export default function Blog(){
       link: "https://www.youtube.com/watch?v=dY5KJXYtO6c" // link
     }
   ];
-  // Render
+
   return (
     <div className="container mt-3">
       <h2 className="section-title">Blog</h2>
