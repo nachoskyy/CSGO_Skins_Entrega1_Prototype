@@ -1,3 +1,4 @@
+// pagina de autenticacion (login y registro)
 import { useEffect, useMemo, useState } from "react";
 import { validateEmail, validateStrongPassword, validateRUT, validateDate, sha256 } from "../utils/validators";
 
@@ -20,15 +21,15 @@ const REGIONES = [
   { name: "Aysén", comunas: ["Coyhaique", "Puerto Aysén"] },
   { name: "Magallanes", comunas: ["Punta Arenas", "Puerto Natales"] },
 ];
-
+// Claves para almacenamiento local
 const USERS_KEY = "tienda-react-users";
 const SESSION_KEY = "tienda-react-session";
-
+// Funciones de lectura y escritura
 function readUsers(){ try { return JSON.parse(localStorage.getItem(USERS_KEY)) ?? []; } catch { return []; } }
 function writeUsers(list){ localStorage.setItem(USERS_KEY, JSON.stringify(list)); }
 function saveSession(email){ localStorage.setItem(SESSION_KEY, JSON.stringify({ email, at: Date.now() })); }
 function clearSession(){ localStorage.removeItem(SESSION_KEY); }
-
+// Componente principal de autenticación
 export default function Auth(){
   const [tab, setTab] = useState("login"); // "login" | "register"
   const [users, setUsers] = useState(readUsers());
@@ -43,9 +44,9 @@ export default function Auth(){
   });
   const [errors, setErrors] = useState({});
   const comunas = useMemo(() => (REGIONES.find(r => r.name === f.region)?.comunas ?? []), [f.region]);
-
+// Actualizar lista de usuarios al montar
   useEffect(()=>{ setUsers(readUsers()); }, []);
-
+// Manejar cambios en formularios
   const changeLogin = e => setLogin(s => ({...s, [e.target.name]: e.target.value}));
   const change = e => setF(s => ({...s, [e.target.name]: e.target.value}));
 
@@ -84,24 +85,24 @@ export default function Auth(){
     setLogin({ email: newUser.email, password: "" });
     alert("Cuenta creada. Ahora puedes iniciar sesión.");
   };
-
+  // Manejar login
   const onLogin = async (ev) => {
     ev.preventDefault();
     setLoginErr("");
-
+    // Validar campos
     if (!validateEmail(login.email)) { setLoginErr("Correo inválido o dominio no permitido."); return; }
     if (!login.password) { setLoginErr("Ingresa tu contraseña."); return; }
-
+    // Verificar credenciales
     const hashed = await sha256(login.password);
     const u = users.find(x => x.email.toLowerCase() === login.email.toLowerCase());
     if (!u || u.password !== hashed) { setLoginErr("Credenciales incorrectas."); return; }
-
+    // Guardar sesión
     saveSession(u.email);
     alert("Inicio de sesión correcto.");
   };
-
+  // Manejar logout (demo)
   const logout = () => { clearSession(); alert("Sesión cerrada."); };
-
+  // Render
   return (
     <div className="container mt-3">
       <h2 className="section-title">Acceso</h2>

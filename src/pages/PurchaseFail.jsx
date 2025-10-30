@@ -1,4 +1,4 @@
-// src/pages/PurchaseFail.jsx
+// pagina de compra fallida
 import { Link } from "react-router-dom";
 
 export default function PurchaseFail(){

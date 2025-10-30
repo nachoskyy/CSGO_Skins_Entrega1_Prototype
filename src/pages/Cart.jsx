@@ -1,10 +1,11 @@
-// src/pages/Cart.jsx — Alinea cantidad, precio y eliminar sin cambiar el estilo
+//carrito de compras
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Store, subscribe } from "../data/store";
 
 const money = (n) => `$${Number(n ?? 0).toLocaleString()}`;
-
+// Hidrata el carrito para mostrar detalle correcto
+// incluye nombre, precio, imagen y categoría del producto
 function readCartHydrated(){
   let base = [];
   try { base = Store.getCart(); } catch {}
@@ -24,7 +25,7 @@ function readCartHydrated(){
     };
   }).filter(x => x.id > 0);
 }
-
+// Componente principal del carrito
 export default function Cart(){
   const [items, setItems] = useState(readCartHydrated());
 
@@ -34,24 +35,24 @@ export default function Cart(){
     setItems(readCartHydrated());
     return () => { try{ un && un(); }catch{} };
   },[]);
-
+// Actualizar cantidad de un ítem
   const updateQty = (id, qty) => {
     const q = Math.max(1, Number(qty||1));
     try{ Store.updateQty(id, q); } catch {}
     setItems(readCartHydrated());
   };
-
+// Remover un ítem del carrito
   const remove = (id) => {
     try{ Store.removeFromCart(id); } catch {}
     setItems(readCartHydrated());
   };
-
+// Vaciar el carrito
   const clear = () => {
     if (!confirm("Vaciar carrito?")) return;
     try{ Store.clearCart(); } catch {}
     setItems([]);
   };
-
+// Calcular subtotal
   const subtotal = useMemo(
     () => items.reduce((s,it) => s + Number(it.price||0) * Number(it.qty||1), 0),
     [items]

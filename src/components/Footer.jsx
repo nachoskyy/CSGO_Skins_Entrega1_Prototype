@@ -1,4 +1,6 @@
+//componente del footer
 export default function Footer(){
+  // Renderizar footer
   return (
     <>
       <footer className="footer">

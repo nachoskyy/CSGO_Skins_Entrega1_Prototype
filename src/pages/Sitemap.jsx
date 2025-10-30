@@ -1,28 +1,8 @@
+//pagina del mapa del sitio
 import { Link } from "react-router-dom";
 import { Store } from "../data/store";
 
 export default function SiteMap() {
-  // 1) Leemos productos de forma segura (sin romper la página si Store falla)
-  let products = [];
-  try {
-    const data = typeof Store?.list === "function" ? Store.list() : [];
-    // normalizamos por si el esquema cambia
-    products = Array.isArray(data) ? data.map(p => ({
-      id: p.id ?? crypto.randomUUID(),
-      name: p.name ?? p.titulo ?? p.nombre ?? "Producto",
-      price: Number(p.price ?? p.precio ?? 0),
-      category: p.category ?? p.categoria ?? "Sin categoría",
-    })) : [];
-  } catch (_) {
-    products = [];
-  }
-
-  // 2) Categorías únicas y ordenadas
-  const categorias = [...new Set(products.map(p => p.category))].filter(Boolean).sort();
-
-  // 3) Algunos “accesos rápidos” 
-  const accesos = products.slice(0, 8);
-
   return (
     <div className="container mt-3">
       <h2 className="section-title">Mapa del sitio</h2>

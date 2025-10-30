@@ -1,3 +1,4 @@
+// Página de inicio con destacados y hero
 import ProductCard from "../components/ProductCard";
 import { Store } from "../data/store";
 import Carousel from "../components/Carousel";
@@ -28,7 +29,7 @@ export default function Home(){
           </div>
         </div>
       </section>
-
+    {/* Destacados obtenidos del store y cargados en el carrusel */}
       <div className="container">
         <h2 className="section-title">Destacados</h2>
         <Carousel>

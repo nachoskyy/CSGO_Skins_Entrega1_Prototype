@@ -1,10 +1,10 @@
-// src/data/store.js
+// store.js: Gestión simple de datos usando LocalStorage como "base de datos".
 const DB_VERSION = 2;
 const VER_KEY   = "tienda-react-version";
 const KEY       = "tienda-react-products";
 const CART_KEY  = "tienda-react-cart";
 
-// Productos de ejemplo (coinciden con /public/img/skins/)
+// Productos semilla
 const seed = [
   { id: 1, name: "AK-47 | Bloodsport",    price: 45000,  category: "Rifles",    offer:false, stock: 8, img:"/img/skins/AK-BLOODSPORT.png" },
   { id: 2, name: "AWP | Dragon",          price: 300000, category: "Rifles",    offer:false, stock: 1, img:"/img/skins/AWP-DRAGON.png" },
@@ -15,14 +15,14 @@ const seed = [
   { id: 7, name: "Desert Eagle | Red",    price: 20000,  category: "Pistolas",   offer:false, stock: 6, img:"/img/skins/DesertEagle-Red.png" },
   { id: 8, name: "Specialist Gloves",     price: 220000, category: "Guantes",    offer:false, stock: 2, img:"/img/skins/Gloves-Specialist.png" },
 ];
-
+// Helpers de lectura y escritura en LocalStorage
 function readLS(key, fb){
   try {
     const raw = localStorage.getItem(key);
     if (raw === null) return fb;
     return JSON.parse(raw);
   } catch { return fb; }
-}
+}// Escritura segura
 function writeLS(key, value){
   try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
 }
@@ -44,7 +44,7 @@ export function subscribe(fn){ listeners.add(fn); return () => listeners.delete(
     writeLS(CART_KEY, []);
   }
 })();
-
+// Store público
 export const Store = {
   list(){ return readLS(KEY, []); },
   getById(id){
@@ -60,6 +60,7 @@ export const Store = {
     writeLS(KEY, data); emit();
     return data[i];
   },
+  // Crear producto
   create(p){
     const data = readLS(KEY, []);
     const id = data.length ? Math.max(...data.map(x=>x.id))+1 : 1;
@@ -67,6 +68,7 @@ export const Store = {
     data.push(row); writeLS(KEY, data); emit();
     return row;
   },
+  // Eliminar producto
   remove(id){
     const data = readLS(KEY, []).filter(p=>p.id!==Number(id));
     writeLS(KEY, data); emit();
@@ -81,6 +83,7 @@ export const Store = {
       qty: Math.max(1, Number(r.qty ?? r.cantidad ?? 1))
     })).filter(r => r.productId>0 && r.qty>0);
   },
+  // Añadir al carrito
   addToCart(productId, qty=1){
     const cart = Store.getCart();
     const i = cart.findIndex(c=>c.productId===Number(productId));
@@ -88,17 +91,20 @@ export const Store = {
     else cart[i].qty += (Number(qty)||1);
     writeLS(CART_KEY, cart); emit();
   },
+  // Actualizar cantidad en el carrito
   updateQty(productId, qty){
     const q = Math.max(1, Number(qty)||1);
     const cart = Store.getCart().map(c => c.productId===Number(productId) ? ({...c, qty:q}) : c);
     writeLS(CART_KEY, cart); emit();
   },
+  // Remover del carrito
   removeFromCart(productId){
     writeLS(CART_KEY, Store.getCart().filter(c=>c.productId!==Number(productId))); emit();
   },
+  // Vaciar carrito
   clearCart(){
     writeLS(CART_KEY, []); emit();
   },
-
+  // Reestablecer datos de productos
   reseed(){ writeLS(KEY, seed); writeLS(VER_KEY, DB_VERSION); emit(); }
 };

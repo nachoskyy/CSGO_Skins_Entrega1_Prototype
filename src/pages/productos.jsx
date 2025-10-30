@@ -1,31 +1,32 @@
-// src/pages/Products.jsx  — Catálogo responsive
+// pagina de productos
 import { useEffect, useMemo, useState } from "react";
 import { Store, subscribe } from "../data/store";
 
-const uniq = (xs) => Array.from(new Set(xs));
+const uniq = (xs) => Array.from(new Set(xs)); 
 
+// Componente principal de productos
 export default function Products(){
-  const [items, setItems] = useState(() => {
-    try { return Store.list(); } catch { return []; }
+  const [items, setItems] = useState(() => { 
+    try { return Store.list(); } catch { return []; } 
   });
-  const [q, setQ] = useState("");
-  const [cat, setCat] = useState("Todas");
-
+  const [q, setQ] = useState(""); 
+  const [cat, setCat] = useState("Todas"); 
+  // Cargar productos al montar
   useEffect(()=>{
     let un = null;
-    try { un = subscribe(()=> setItems(Store.list())); } catch {}
-    try {
+    try { un = subscribe(()=> setItems(Store.list())); } catch {} // suscripción a cambios
+    try { // cargar productos si no hay
       const now = Store.list();
-      if (!now || now.length === 0) {
-        if (typeof Store.reseed === "function") Store.reseed();
-        setItems(Store.list());
+      if (!now || now.length === 0) {  // cargar productos iniciales
+        if (typeof Store.reseed === "function") Store.reseed(); // recargar datos
+        setItems(Store.list()); // actualizar estado
       }
     } catch {}
-    return () => { try{ un && un(); }catch{} };
+    return () => { try{ un && un(); }catch{} }; 
   },[]);
-
+  // Categorías únicas
   const cats = useMemo(() => ["Todas", ...uniq((items||[]).map(p=>p.category).filter(Boolean))], [items]);
-
+  // Vista filtrada
   const view = useMemo(()=>{
     const needle = q.trim().toLowerCase();
     return (items||[])
@@ -40,12 +41,13 @@ export default function Products(){
       });
   }, [items, q, cat]);
 
+  // Añadir al carrito
   const add = (id) => {
     try { Store.addToCart(id, 1); } catch {}
   };
-
+  // Formatear dinero
   const money = (n) => `$${Number(n ?? 0).toLocaleString()}`;
-
+  // Render
   return (
     <div className="container mt-3">
       <h2 className="section-title">Productos</h2>
@@ -73,8 +75,6 @@ export default function Products(){
           </div>
         </div>
       </div>
-
-      {/* Grid responsive sin cortes en móvil */}
       <div className="row g-3 row-cols-1 row-cols-sm-2 row-cols-lg-4">
         {view.map(p => (
           <div className="col" key={p.id}>

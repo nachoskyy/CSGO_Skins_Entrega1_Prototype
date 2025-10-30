@@ -1,4 +1,4 @@
-// src/pages/Nosotros.jsx
+//pagina de "nosotros"
 export default function Nosotros(){
   return (
     <div className="container mt-3">

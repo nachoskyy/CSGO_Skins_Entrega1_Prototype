@@ -1,11 +1,12 @@
+//  Formulario de contacto
 import { useState } from "react";
 import { validateEmail } from "../utils/validators";
-
+// Componente principal de contacto
 export default function Contacto(){
   const [f, setF] = useState({ nombre:"", email:"", mensaje:"" });
   const [sent, setSent] = useState(false);
   const [emailErr, setEmailErr] = useState("");
-
+  // Manejar cambios en el formulario
   const onChange = e => {
     const { name, value } = e.target;
     setF(s => ({ ...s, [name]: value }));
@@ -13,7 +14,7 @@ export default function Contacto(){
       setEmailErr(validateEmail(value) ? "" : "Correo inválido (usa @duocuc.cl, @outlook.com o @gmail.com)");
     }
   };
-
+  // Manejar envío del formulario
   const enviar = (e) => {
     e.preventDefault();
     if (!validateEmail(f.email)) {
@@ -24,9 +25,9 @@ export default function Contacto(){
     setTimeout(()=> setSent(false), 3000);
     setF({ nombre:"", email:"", mensaje:"" });
   };
-
+  
   const disabled = !f.nombre.trim() || !f.mensaje.trim() || !!emailErr || !validateEmail(f.email);
-
+  // Render
   return (
     <div className="container mt-3">
       <h2 className="section-title">Contacto</h2>

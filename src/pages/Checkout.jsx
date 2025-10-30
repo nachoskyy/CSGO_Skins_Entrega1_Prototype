@@ -1,6 +1,7 @@
-// src/pages/Checkout.jsx
+// pagina de checkout y pago
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+// validadores reutilizables
 import {
   luhnCheck,
   normalizeCardNumber,
@@ -15,16 +16,18 @@ import { Store } from "../data/store";
 const money = (n) => `$${Number(n ?? 0).toLocaleString()}`;
 
 // Hidrata el carrito para mostrar detalle correcto
+// incluye nombre, precio e imagen del producto
 function readCartHydrated(){
-  let base = [];
-  try { base = Store.getCart(); } catch {}
+  let base = []; 
+  try { base = Store.getCart(); } catch {} 
   if (!Array.isArray(base)) base = [];
-  return base.map(r => {
-    const id = Number(r.productId ?? r.id);
-    const qty = Math.max(1, Number(r.qty ?? r.cantidad ?? 1));
+  return base.map(r => { 
+    const id = Number(r.productId ?? r.id); 
+    const qty = Math.max(1, Number(r.qty ?? r.cantidad ?? 1)); 
     let p = null;
     try { p = Store.getById(id); } catch {}
-    return {
+    // devolver detalle completo
+    return { 
       id,
       qty,
       name: p?.name ?? "Producto",
@@ -33,10 +36,10 @@ function readCartHydrated(){
     };
   }).filter(x => x.id > 0);
 }
-
+// Componente principal de checkout
 export default function Checkout(){
   const nav = useNavigate();
-
+// estado del formulario
   const [form, setForm] = useState({
     nombre: "",
     email: "",
@@ -45,13 +48,14 @@ export default function Checkout(){
     exp: "",
     cvv: ""
   });
+  // errores de validación
   const [errors, setErrors] = useState({});
   const [processing, setProcessing] = useState(false);
-
+  // ítems del carrito
   const items = readCartHydrated();
   const subtotal = useMemo(()=> items.reduce((s, it) => s + Number(it.price||0) * Number(it.qty||1), 0), [items]);
   const total = subtotal;
-
+  // manejar cambios en el formulario
   const onChange = (e) => {
     const { name, value } = e.target;
 
@@ -69,7 +73,7 @@ export default function Checkout(){
     }
     setForm(f => ({...f, [name]: value}));
   };
-
+  // manejar envío del formulario
   const onSubmit = async (e) => {
     e.preventDefault();
     const errs = {};
@@ -165,8 +169,6 @@ export default function Checkout(){
               {errors.card && <div className="text-danger mt-1">{errors.card}</div>}
               <div className="form-text text-secondary">Ingresa 16 dígitos. Se agrupan automático en 4.</div>
             </div>
-
-            {/* Columnas iguales y alineadas en base */}
             <div className="row g-3 form-row-eq">
               <div className="col-12 col-sm-6">
                 <div className="form-group-eq">
@@ -200,7 +202,6 @@ export default function Checkout(){
                     maxLength={3}
                   />
                   {errors.cvv && <div className="text-danger mt-1">{errors.cvv}</div>}
-                  {/* placeholder invisible para igualar alturas */}
                   <div className="form-text invisible">placeholder</div>
                 </div>
               </div>

@@ -1,4 +1,4 @@
-// src/pages/PurchaseSuccess.jsx
+//pagina de exito de compra
 import { Link } from "react-router-dom";
 
 export default function PurchaseSuccess(){
