@@ -2,15 +2,17 @@
 import { Link, NavLink } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Store } from "../data/store";
+import axios from "axios";
 
 export default function Navbar() {
 
   const [cartCount, setCartCount] = useState(0);
   const [usuario, setUsuario] = useState(null);
+  const [dolar, setDolar] = useState(null);
 
-  // ------------------------------
+  // ================================
   // Cargar sesión usuario
-  // ------------------------------
+  // ================================
   useEffect(() => {
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
@@ -28,9 +30,9 @@ export default function Navbar() {
     window.location.href = "/Auth";
   }
 
-  // ------------------------------
+  // ================================
   // Carrito
-  // ------------------------------
+  // ================================
   const recomputeCart = () => {
     try {
       const items = Store.getCart();
@@ -49,15 +51,36 @@ export default function Navbar() {
     return () => un();
   }, []);
 
+  // ================================
+  // Obtener precio del dólar
+  // ================================
+  // ================================
+  // Obtener precio del dólar
+  // ================================
+  useEffect(() => {
+    async function fetchDolar() {
+      try {
+        const res = await axios.get("http://localhost:8080/api/external/dolar");
+        setDolar(res.data?.valor ?? null);
+      } catch (err) {
+        console.log("No se pudo obtener el dólar:", err);
+      }
+    }
+
+    fetchDolar();
+  }, []);
+
+
   return (
     <nav className="navbar navbar-expand-lg navbar-dark navbar-glass fixed-top">
-      <div className="container">
+      <div className="container d-flex align-items-center justify-content-between">
 
         {/* LOGO */}
         <Link className="navbar-brand fw-bold" to="/">
           K&N Skins
         </Link>
 
+        {/* BOTÓN HAMBURGUESA */}
         <button
           className="navbar-toggler"
           type="button"
@@ -67,8 +90,9 @@ export default function Navbar() {
           <span className="navbar-toggler-icon"></span>
         </button>
 
+        {/* CONTENIDO DEL NAVBAR */}
         <div id="nav" className="collapse navbar-collapse">
-          
+
           {/* IZQUIERDA */}
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item"><NavLink className="nav-link" to="/">Inicio</NavLink></li>
@@ -79,9 +103,15 @@ export default function Navbar() {
           </ul>
 
           {/* DERECHA */}
-          <ul className="navbar-nav ms-auto">
+          <ul className="navbar-nav ms-auto d-flex align-items-center">
 
-            {/* Si NO hay usuario logeado */}
+            {dolar && (
+              <span className="text-success fw-bold me-1">
+                💵 1 USD = ${dolar}
+              </span>
+            )}
+
+            {/* Usuario no logueado */}
             {!usuario && (
               <li className="nav-item">
                 <NavLink className="nav-link" to="/Auth">
@@ -90,19 +120,15 @@ export default function Navbar() {
               </li>
             )}
 
-            {/* Si hay usuario logeado */}
+            {/* Usuario logueado */}
             {usuario && (
               <>
-                {/* Admin Panel */}
                 {usuario.role === "ADMIN" && (
                   <li className="nav-item">
-                    <NavLink className="nav-link" to="/admin/dashboard">
-                      ⚙ Panel Admin
-                    </NavLink>
+                    <NavLink className="nav-link" to="/admin/dashboard">⚙ Panel Admin</NavLink>
                   </li>
                 )}
 
-                {/* Avatar + nombre */}
                 <li className="nav-item d-flex align-items-center mx-2 text-light">
                   <div
                     className="rounded-circle bg-success d-flex justify-content-center align-items-center me-2"
@@ -116,18 +142,13 @@ export default function Navbar() {
                   </span>
                 </li>
 
-                {/* Logout */}
                 <li className="nav-item d-flex align-items-center mx-2">
-                  <button
-                    className="btn btn-sm btn-outline-danger"
-                    onClick={logout}
-                    style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
-                  >
+                  <button className="btn btn-sm btn-outline-danger" onClick={logout}>
                     Cerrar sesión
                   </button>
                 </li>
-                </>
-                )}
+              </>
+            )}
 
             {/* Carrito */}
             <li className="nav-item position-relative">
@@ -144,7 +165,6 @@ export default function Navbar() {
           </ul>
 
         </div>
-
       </div>
     </nav>
   );
