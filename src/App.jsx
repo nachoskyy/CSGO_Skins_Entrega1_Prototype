@@ -18,6 +18,7 @@ import Contacto from "./pages/Contacto";
 import Auth from "./pages/Auth";
 
 // Admin
+import PrivateRoute from "./components/PrivateRoute";
 import Dashboard from "./pages/Admin/Dashboard";
 import ProductsAdmin from "./pages/Admin/ProductsAdmin";
 import OrdersAdmin from "./pages/Admin/OrdersAdmin";
@@ -55,31 +56,34 @@ export default function App() {
           {/* ============================
                PANEL ADMIN (PROTEGIDO)
           ============================ */}
-          <Route path="/admin/dashboard" element={
-            <ProtectedAdmin>
-              <Dashboard />
-            </ProtectedAdmin> 
-           } 
+
+          <Route 
+            path="/admin/dashboard" 
+            element={
+              <PrivateRoute requireAdmin={true}>
+                <Dashboard />
+              </PrivateRoute>
+            }
           />
 
           <Route path="/admin/products" element={
-            <ProtectedAdmin>
+            <PrivateRoute requireAdmin={true}>
               <ProductsAdmin />
-            </ProtectedAdmin>
+            </PrivateRoute>
             } 
           />
 
           <Route path="/admin/orders" element={
-            <ProtectedAdmin>
+            <PrivateRoute requireAdmin={true}>
               <OrdersAdmin />
-            </ProtectedAdmin>
+            </PrivateRoute>
             }
           />
 
           <Route path="/admin/users" element={
-            <ProtectedAdmin>
+            <PrivateRoute requireAdmin={true}>
               <UsersAdmin />
-            </ProtectedAdmin>
+            </PrivateRoute>
             } 
           />
 

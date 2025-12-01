@@ -1,33 +1,49 @@
-// src/api/client.js
 import axios from "axios";
 
-// URL del backend. En dev será http://localhost:8080 o similar.
-// En producción será la URL de tu backend en EC2.
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-
 export const apiClient = axios.create({
-  baseURL: BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  baseURL: "http://localhost:8080",
+  withCredentials: false
 });
 
-// Aquí más adelante vamos a meter JWT (Authorization: Bearer ...)
+// ======================================================
+//  1) INTERCEPTOR → Agregar token automáticamente
+// ======================================================
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
 
+    if (token) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
 
-const baseURL = import.meta.env.VITE_API_URL;
-
-export const client = {
-  get: async (url) => {
-    const res = await fetch(baseURL + url);
-    return res.json();
+    return config;
   },
-  post: async (url, body) => {
-    const res = await fetch(baseURL + url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    return res.json();
-  },
-};
+  (error) => Promise.reject(error)
+);
+
+// ======================================================
+//  2) INTERCEPTOR → Manejar 401 / 403
+// ======================================================
+apiClient.interceptors.response.use(
+  (response) => response,
+
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Token expirado o inválido
+    if ((error.response?.status === 401 || error.response?.status === 403)) {
+      alert("No autorizado. Inicia sesión nuevamente.");
+
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      localStorage.removeItem("nombre");
+      localStorage.removeItem("email");
+      localStorage.removeItem("user");
+
+      window.location.href = "/Auth";
+      return;
+    }
+
+    return Promise.reject(error);
+  }
+);

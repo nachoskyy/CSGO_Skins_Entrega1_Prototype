@@ -5,10 +5,32 @@ import { Store } from "../data/store";
 
 export default function Navbar() {
 
-  // estado interno del contador del carrito
   const [cartCount, setCartCount] = useState(0);
+  const [usuario, setUsuario] = useState(null);
 
-  // función para recalcular total de unidades en carrito
+  // ------------------------------
+  // Cargar sesión usuario
+  // ------------------------------
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+    const nombre = localStorage.getItem("nombre");
+    const email = localStorage.getItem("email");
+
+    if (token && role && nombre) {
+      setUsuario({ token, role, nombre, email });
+    }
+  }, []);
+
+  function logout() {
+    localStorage.clear();
+    setUsuario(null);
+    window.location.href = "/Auth";
+  }
+
+  // ------------------------------
+  // Carrito
+  // ------------------------------
   const recomputeCart = () => {
     try {
       const items = Store.getCart();
@@ -20,14 +42,10 @@ export default function Navbar() {
   };
 
   useEffect(() => {
-    // primera carga
     recomputeCart();
-
-    // suscribirse SOLO a cambios del carrito
     const un = Store.subscribeCart(() => {
       recomputeCart();
     });
-
     return () => un();
   }, []);
 
@@ -37,7 +55,7 @@ export default function Navbar() {
 
         {/* LOGO */}
         <Link className="navbar-brand fw-bold" to="/">
-          CSGO Skins
+          K&N Skins
         </Link>
 
         <button
@@ -51,7 +69,7 @@ export default function Navbar() {
 
         <div id="nav" className="collapse navbar-collapse">
           
-          {/* Links izquierda */}
+          {/* IZQUIERDA */}
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item"><NavLink className="nav-link" to="/">Inicio</NavLink></li>
             <li className="nav-item"><NavLink className="nav-link" to="/productos">Productos</NavLink></li>
@@ -60,9 +78,58 @@ export default function Navbar() {
             <li className="nav-item"><NavLink className="nav-link" to="/contacto">Contáctanos</NavLink></li>
           </ul>
 
-          {/* derecha */}
+          {/* DERECHA */}
           <ul className="navbar-nav ms-auto">
-            <li className="nav-item"><NavLink className="nav-link" to="/Auth">Login / Registro</NavLink></li>
+
+            {/* Si NO hay usuario logeado */}
+            {!usuario && (
+              <li className="nav-item">
+                <NavLink className="nav-link" to="/Auth">
+                  Login / Registro
+                </NavLink>
+              </li>
+            )}
+
+            {/* Si hay usuario logeado */}
+            {usuario && (
+              <>
+                {/* Admin Panel */}
+                {usuario.role === "ADMIN" && (
+                  <li className="nav-item">
+                    <NavLink className="nav-link" to="/admin/dashboard">
+                      ⚙ Panel Admin
+                    </NavLink>
+                  </li>
+                )}
+
+                {/* Avatar + nombre */}
+                <li className="nav-item d-flex align-items-center mx-2 text-light">
+                  <div
+                    className="rounded-circle bg-success d-flex justify-content-center align-items-center me-2"
+                    style={{ width: 32, height: 32, fontWeight: "bold" }}
+                  >
+                    {usuario.nombre.charAt(0).toUpperCase()}
+                  </div>
+                  <span>
+                    Hola, {usuario.nombre.split(" ")[0]}
+                    <small className="text-secondary"> ({usuario.role})</small>
+                  </span>
+                </li>
+
+                {/* Logout */}
+                <li className="nav-item d-flex align-items-center mx-2">
+                  <button
+                    className="btn btn-sm btn-outline-danger"
+                    onClick={logout}
+                    style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+                  >
+                    Cerrar sesión
+                  </button>
+                </li>
+                </>
+                )}
+
+            {/* Carrito */}
             <li className="nav-item position-relative">
               <NavLink className="nav-link" to="/carrito">
                 🛒 Carrito
@@ -73,6 +140,7 @@ export default function Navbar() {
                 )}
               </NavLink>
             </li>
+
           </ul>
 
         </div>

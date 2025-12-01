@@ -1,9 +1,8 @@
 // src/pages/ProductsAdmin.jsx
 import { useEffect, useState } from "react";
-import { ProductsAPI, CategoriesAPI } from "../../api";   
-import { Store } from "../../data/store";       
+import { ProductsAPI, CategoriesAPI } from "../../api";
+import { Store } from "../../data/store";
 import AdminBackButton from "../../components/AdminBackButton";
-
 
 export default function ProductsAdmin() {
 
@@ -23,13 +22,25 @@ export default function ProductsAdmin() {
 
   const [editing, setEditing] = useState(false);
 
-  // ===========================
+  // =====================================================
+  // PROTEGER RUTA: SOLO ADMIN
+  // =====================================================
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (!token || role !== "ADMIN") {
+      window.location.href = "/Auth";
+      return;
+    }
+  }, []);
+
+  // =====================================================
   // CARGA INICIAL
-  // ===========================
+  // =====================================================
   useEffect(() => {
     cargarTodo();
 
-    // ACTUALIZA LA LISTA CUANDO STORE CAMBIE
     let un = null;
     try {
       un = Store.subscribe(() => cargarTodo());
@@ -40,10 +51,20 @@ export default function ProductsAdmin() {
     };
   }, []);
 
+  // =====================================================
+  // CARGAR TODOS LOS DATOS (con token)
+  // =====================================================
   async function cargarTodo() {
     try {
-      const prodsBD = await ProductsAPI.getProducts();
-      const catsBD = await CategoriesAPI.getCategories();
+      const token = localStorage.getItem("token");
+
+      const prodsBD = await ProductsAPI.getProducts({
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      const catsBD = await CategoriesAPI.getCategories({
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
       setCategorias(catsBD);
 
@@ -61,7 +82,7 @@ export default function ProductsAdmin() {
         }))
       );
 
-      // Actualizamos el STORE local
+      // Actualizar store local
       Store.setProducts(
         prodsBD.map(p => ({
           id: p.id,
@@ -75,12 +96,18 @@ export default function ProductsAdmin() {
 
     } catch (err) {
       console.error("Error cargando datos:", err);
+
+      if (err.response?.status === 403) {
+        alert("Sesión expirada. Inicie sesión nuevamente.");
+        localStorage.clear();
+        window.location.href = "/Auth";
+      }
     }
   }
 
-  // ===========================
-  // MANEJO DE FORMULARIO
-  // ===========================
+  // =====================================================
+  // FORMULARIO
+  // =====================================================
   const onChange = e => {
     const { name, value, type, checked } = e.target;
     setForm(f => ({
@@ -103,9 +130,9 @@ export default function ProductsAdmin() {
     });
   };
 
-  // ===========================
+  // =====================================================
   // EDITAR PRODUCTO
-  // ===========================
+  // =====================================================
   const edit = (p) => {
     setEditing(true);
     setForm({
@@ -120,11 +147,13 @@ export default function ProductsAdmin() {
     });
   };
 
-  // ===========================
-  // GUARDAR PRODUCTO
-  // ===========================
+  // =====================================================
+  // GUARDAR (EDITAR O CREAR)
+  // =====================================================
   const save = async () => {
     try {
+      const token = localStorage.getItem("token");
+
       const payload = {
         nombre: form.name,
         precio: Number(form.price),
@@ -136,37 +165,69 @@ export default function ProductsAdmin() {
       };
 
       if (editing) {
-        await ProductsAPI.updateProduct(form.id, payload);
+        await ProductsAPI.updateProduct(
+          form.id,
+          payload,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
       } else {
-        await ProductsAPI.createProduct(payload);
+        await ProductsAPI.createProduct(
+          payload,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
       }
 
       resetForm();
       cargarTodo();
+      alert("Producto guardado correctamente.");
 
     } catch (err) {
       console.error("Error guardando producto:", err);
-      alert("Error al guardar producto");
+
+      if (err.response?.status === 403) {
+        alert("No autorizado. Inicia sesión nuevamente.");
+        localStorage.clear();
+        window.location.href = "/Auth";
+        return;
+      }
+
+      alert("Error al guardar producto.");
     }
   };
 
-  // ===========================
+  // =====================================================
   // ELIMINAR PRODUCTO
-  // ===========================
+  // =====================================================
   const remove = async (id) => {
     if (!confirm("¿Eliminar producto?")) return;
 
     try {
-      await ProductsAPI.deleteProduct(id);
+      const token = localStorage.getItem("token");
+
+      await ProductsAPI.deleteProduct(
+        id,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
       cargarTodo();
+
     } catch (err) {
       console.error("Error eliminando producto:", err);
-      alert("No se pudo eliminar.");
+
+      if (err.response?.status === 403) {
+        alert("No autorizado.");
+      } else {
+        alert("No se pudo eliminar.");
+      }
     }
   };
 
+  // =====================================================
+  // RENDER
+  // =====================================================
   return (
     <div className="container mt-3">
+
       <AdminBackButton />
       <h2 className="section-title">Administrar Productos</h2>
 
