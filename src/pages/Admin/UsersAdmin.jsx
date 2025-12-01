@@ -19,7 +19,6 @@ export default function UsersAdmin() {
     const role = localStorage.getItem("role");
 
     if (!token || role !== "ADMIN") {
-      // Bloquea la página para usuarios no autorizados
       window.location.href = "/Auth";
     }
   }
@@ -45,7 +44,6 @@ export default function UsersAdmin() {
     } catch (err) {
       console.error("Error cargando usuarios:", err);
 
-      // Si token expiró → obligar a logear nuevamente
       if (err.response && err.response.status === 403) {
         alert("Sesión expirada. Por favor inicia sesión nuevamente.");
         localStorage.clear();
@@ -55,7 +53,7 @@ export default function UsersAdmin() {
   }
 
   // ===========================
-  // HACER ADMIN (con token)
+  // HACER ADMIN
   // ===========================
   async function hacerAdmin(id) {
     try {
@@ -98,8 +96,23 @@ export default function UsersAdmin() {
             <div>
               <div className="fw-bold fs-5">{u.nombre}</div>
               <div className="text-secondary">{u.email}</div>
+
               <div className="badge mt-1 bg-dark text-light">
                 Rol: {u.role}
+              </div>
+
+              {/* FECHA DE CREACIÓN */}
+              <div className="text-secondary small mt-1">
+                Creado el:{" "}
+                {u.fechaCreacion
+                  ? new Date(u.fechaCreacion).toLocaleString("es-CL", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit"
+                    })
+                  : "Fecha no disponible"}
               </div>
             </div>
 
