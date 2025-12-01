@@ -7,23 +7,81 @@ export default function UsersAdmin() {
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
+    validarAdmin();
     cargarUsuarios();
   }, []);
 
-  async function cargarUsuarios() {
-    try {
-      const res = await axios.get("http://localhost:8080/api/usuarios");
-      setUsers(res.data);
-    } catch (err) {
-      console.error("Error cargando usuarios:", err);
+  // ===========================
+  // VALIDAR QUE SEA ADMIN
+  // ===========================
+  function validarAdmin() {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (!token || role !== "ADMIN") {
+      // Bloquea la página para usuarios no autorizados
+      window.location.href = "/Auth";
     }
   }
 
-  async function hacerAdmin(id) {
-    await axios.post(`http://localhost:8080/api/usuarios/${id}/make-admin`);
-    cargarUsuarios();
+  // ===========================
+  // CARGAR USUARIOS (con token)
+  // ===========================
+  async function cargarUsuarios() {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await axios.get(
+        "http://localhost:8080/api/usuarios",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      setUsers(res.data);
+
+    } catch (err) {
+      console.error("Error cargando usuarios:", err);
+
+      // Si token expiró → obligar a logear nuevamente
+      if (err.response && err.response.status === 403) {
+        alert("Sesión expirada. Por favor inicia sesión nuevamente.");
+        localStorage.clear();
+        window.location.href = "/Auth";
+      }
+    }
   }
 
+  // ===========================
+  // HACER ADMIN (con token)
+  // ===========================
+  async function hacerAdmin(id) {
+    try {
+      const token = localStorage.getItem("token");
+
+      await axios.post(
+        `http://localhost:8080/api/usuarios/${id}/make-admin`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      cargarUsuarios();
+
+    } catch (err) {
+      console.error("Error al hacer admin:", err);
+      alert("No tienes permisos para esta acción.");
+    }
+  }
+
+  // ===========================
+  // RENDER
+  // ===========================
   return (
     <div className="container mt-4">
       <AdminBackButton />

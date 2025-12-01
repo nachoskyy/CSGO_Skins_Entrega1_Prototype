@@ -88,10 +88,19 @@ export default function Auth() {
         return;
       }
 
-      // Guardar usuario
+
+
+      // =============================
+      // GUARDAR SESIÓN COMPLETA
+      // =============================
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("role", res.data.role);
+      localStorage.setItem("nombre", res.data.nombre);
+      localStorage.setItem("email", res.data.email);
+
+      // (Opcional, si quieres guardar todo junto)
       localStorage.setItem("user", JSON.stringify(res.data));
 
-      // ⭐ MENSAJE NUEVO LOGIN EXITOSO
       alert("Inicio de sesión exitoso. ¡Bienvenido!");
 
       // Redirección según rol
@@ -99,11 +108,13 @@ export default function Auth() {
         window.location.href = "/admin/dashboard";
       } else {
         window.location.href = "/";
+    }
+    } catch (error) {
+      if (error.response) {
+        setLoginErr(error.response.data);
+      } else {
+        setLoginErr("Error al conectar con el servidor.");
       }
-
-    } catch (err) {
-      console.error(err);
-      setLoginErr("Error inesperado de servidor.");
     }
   };
 
@@ -209,7 +220,7 @@ export default function Auth() {
         password: f.password
       });
 
-      // ⭐ MENSAJE NUEVO EN REGISTRO (SIN [object Object])
+      // MENSAJE NUEVO EN REGISTRO 
       alert("Cuenta creada con éxito. Ahora puedes iniciar sesión.");
 
       setTab("login");
