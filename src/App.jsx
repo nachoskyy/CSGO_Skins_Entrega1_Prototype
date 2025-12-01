@@ -22,7 +22,6 @@ import Dashboard from "./pages/Admin/Dashboard";
 import ProductsAdmin from "./pages/Admin/ProductsAdmin";
 import OrdersAdmin from "./pages/Admin/OrdersAdmin";
 import UsersAdmin from "./pages/Admin/UsersAdmin";
-
 import ProtectedAdmin from "./components/ProtectedAdmin";
 
 export default function App() {
@@ -56,40 +55,32 @@ export default function App() {
           {/* ============================
                PANEL ADMIN (PROTEGIDO)
           ============================ */}
-          <Route
-            path="/admin"
-            element={
-              <ProtectedAdmin>
-                <Dashboard />
-              </ProtectedAdmin>
+          <Route path="/admin/dashboard" element={
+            <ProtectedAdmin>
+              <Dashboard />
+            </ProtectedAdmin> 
+           } 
+          />
+
+          <Route path="/admin/products" element={
+            <ProtectedAdmin>
+              <ProductsAdmin />
+            </ProtectedAdmin>
+            } 
+          />
+
+          <Route path="/admin/orders" element={
+            <ProtectedAdmin>
+              <OrdersAdmin />
+            </ProtectedAdmin>
             }
           />
 
-          <Route
-            path="/admin/productos"
-            element={
-              <ProtectedAdmin>
-                <ProductsAdmin />
-              </ProtectedAdmin>
-            }
-          />
-
-          <Route
-            path="/admin/ordenes"
-            element={
-              <ProtectedAdmin>
-                <OrdersAdmin />
-              </ProtectedAdmin>
-            }
-          />
-
-          <Route
-            path="/admin/usuarios"
-            element={
-              <ProtectedAdmin>
-                <UsersAdmin />
-              </ProtectedAdmin>
-            }
+          <Route path="/admin/users" element={
+            <ProtectedAdmin>
+              <UsersAdmin />
+            </ProtectedAdmin>
+            } 
           />
 
         </Routes>

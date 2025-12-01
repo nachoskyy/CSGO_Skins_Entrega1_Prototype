@@ -65,44 +65,47 @@ export default function Auth() {
   };
 
   const onLogin = async (ev) => {
-  ev.preventDefault();
-  setLoginErr("");
+    ev.preventDefault();
+    setLoginErr("");
 
-  if (!validateEmail(login.email)) {
-    setLoginErr("Correo inválido.");
-    return;
-  }
-  if (!login.password) {
-    setLoginErr("Ingresa tu contraseña.");
-    return;
-  }
-
-  try {
-    const res = await axios.post("http://localhost:8080/api/usuarios/login", {
-      email: login.email,
-      password: login.password
-    });
-
-    if (res.data.status !== "OK") {
-      setLoginErr(res.data.message);
+    if (!validateEmail(login.email)) {
+      setLoginErr("Correo inválido.");
+      return;
+    }
+    if (!login.password) {
+      setLoginErr("Ingresa tu contraseña.");
       return;
     }
 
-    // Guardar usuario
-    localStorage.setItem("user", JSON.stringify(res.data));
+    try {
+      const res = await axios.post("http://localhost:8080/api/usuarios/login", {
+        email: login.email,
+        password: login.password
+      });
 
-    // Redirección según rol
-    if (res.data.role === "ADMIN") {
-      window.location.href = "/admin/dashboard";
-    } else {
-      window.location.href = "/";
+      if (res.data.status !== "OK") {
+        setLoginErr(res.data.message);
+        return;
+      }
+
+      // Guardar usuario
+      localStorage.setItem("user", JSON.stringify(res.data));
+
+      // ⭐ MENSAJE NUEVO LOGIN EXITOSO
+      alert("Inicio de sesión exitoso. ¡Bienvenido!");
+
+      // Redirección según rol
+      if (res.data.role === "ADMIN") {
+        window.location.href = "/admin/dashboard";
+      } else {
+        window.location.href = "/";
+      }
+
+    } catch (err) {
+      console.error(err);
+      setLoginErr("Error inesperado de servidor.");
     }
-
-  } catch (err) {
-    console.error(err);
-    setLoginErr("Error inesperado de servidor.");
-  }
-};
+  };
 
 
   // =============================
@@ -206,7 +209,9 @@ export default function Auth() {
         password: f.password
       });
 
-      alert(res.data);
+      // ⭐ MENSAJE NUEVO EN REGISTRO (SIN [object Object])
+      alert("Cuenta creada con éxito. Ahora puedes iniciar sesión.");
+
       setTab("login");
       setLogin({ email: f.email, password: "" });
 

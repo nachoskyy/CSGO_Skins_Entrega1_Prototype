@@ -1,7 +1,9 @@
 // src/pages/ProductsAdmin.jsx
 import { useEffect, useState } from "react";
 import { ProductsAPI, CategoriesAPI } from "../../api";   
-import { Store } from "../../data/store";                 
+import { Store } from "../../data/store";       
+import AdminBackButton from "../../components/AdminBackButton";
+
 
 export default function ProductsAdmin() {
 
@@ -165,6 +167,7 @@ export default function ProductsAdmin() {
 
   return (
     <div className="container mt-3">
+      <AdminBackButton />
       <h2 className="section-title">Administrar Productos</h2>
 
       <div className="row g-3 mt-2">

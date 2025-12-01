@@ -315,3 +315,18 @@ a:hover { color: var(--brand); }
 }
 .form-group-eq .form-label{ margin-bottom:.35rem; }
 .form-group-eq .form-text{ margin-top:.25rem; }
+
+
+.admin-card {
+  background: #101820;
+  border-radius: 8px;
+}
+
+.admin-card .border-bottom {
+  border-color: rgba(255,255,255,0.1) !important;
+}
+
+.badge {
+  font-size: 0.8rem;
+  padding: 4px 8px;
+}
