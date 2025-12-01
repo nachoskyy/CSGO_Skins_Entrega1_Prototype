@@ -1,13 +1,26 @@
-//pagina del dashboard de administracion
-import { Link } from "react-router-dom";
-
-export default function Dashboard(){
+export default function Dashboard() {
   return (
-    <div className="container mt-3">
-      <h2 className="section-title">Panel de administración</h2>
-      <div className="d-flex gap-3">
-        <Link to="/admin/productos" className="btn btn-outline-primary">Productos</Link>
-        <Link to="/admin/ordenes" className="btn btn-outline-primary">"Ordenes"</Link>
+    <div className="container mt-4">
+      <h2 className="section-title">Panel de Administración</h2>
+
+      <div className="row g-3 mt-3">
+        <div className="col-md-4">
+          <a href="/Admin/Productos" className="btn btn-brand w-100 p-4">
+            Administrar Productos
+          </a>
+        </div>
+
+        <div className="col-md-4">
+          <a href="/Admin/Ordenes" className="btn btn-outline-primary w-100 p-4">
+            Órdenes
+          </a>
+        </div>
+
+        <div className="col-md-4">
+          <a href="/Admin/Usuarios" className="btn btn-outline-secondary w-100 p-4">
+            Usuarios
+          </a>
+        </div>
       </div>
     </div>
   );
