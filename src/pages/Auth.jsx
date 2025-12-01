@@ -53,7 +53,7 @@ export default function Auth(){
   // ===== VALIDACIÓN REGISTRO =====
   const validateRegister = () => {
     const e = {};
-    if (!validateRUT(f.run)) e.run = "RUN inválido. Ej: 19.011.022-K o 19011022K";
+    if (!validateRUT(f.run)) e.run = "RUN inválido. Ejemplo valido: 20.388.360-9 o 20388360-9";
     if (!f.nombres.trim()) e.nombres = "Ingresa tus nombres.";
     if (!f.apellidos.trim()) e.apellidos = "Ingresa tus apellidos.";
     if (!validateEmail(f.email)) e.email = "Correo inválido (solo @duocuc.cl, @outlook.com, @gmail.com).";
@@ -90,7 +90,7 @@ export default function Auth(){
     ev.preventDefault();
     setLoginErr("");
     // Validar campos
-    if (!validateEmail(login.email)) { setLoginErr("Correo inválido o dominio no permitido."); return; }
+    if (!validateEmail(login.email)) { setLoginErr("Correo inválido."); return; }
     if (!login.password) { setLoginErr("Ingresa tu contraseña."); return; }
     // Verificar credenciales
     const hashed = await sha256(login.password);
@@ -119,7 +119,7 @@ export default function Auth(){
           <h5 className="mb-3">Inicio de sesión</h5>
           <form onSubmit={onLogin} className="row g-3">
             <div className="col-12">
-              <label className="form-label">Correo (solo @duocuc.cl, @outlook.com, @gmail.com)</label>
+              <label className="form-label">Correo</label>
               <input className="form-control bg-dark text-light border-secondary" name="email" value={login.email} onChange={changeLogin} required />
             </div>
             <div className="col-12">
@@ -160,7 +160,7 @@ export default function Auth(){
             </div>
 
             <div className="col-md-6">
-              <label className="form-label">Correo (solo @duocuc.cl, @outlook.com, @gmail.com)</label>
+              <label className="form-label">Correo</label>
               <input type="email" className="form-control bg-dark text-light border-secondary" name="email" value={f.email} onChange={change} required />
               {errors.email && <div className="text-danger">{errors.email}</div>}
             </div>

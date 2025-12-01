@@ -1,59 +1,82 @@
-//componente de la barra de navegación
+// src/components/Navbar.jsx
 import { Link, NavLink } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Store, subscribe } from "../data/store";
-// Componente Navbar
-export default function Navbar(){
-  const [count, setCount] = useState(0);
-  
-  useEffect(()=>{
-    // Recalcular cantidad en el carrito
-    const recalc = () => {
-      try{
-        const cart = Store.getCart(); // array de ítems
-        const c = Array.isArray(cart) ? cart.reduce((s,x)=> s + Number(x.qty||1), 0) : 0; // sumar cantidades
-        setCount(Number.isFinite(c) ? c : 0); // actualizar estado
-      }catch{ setCount(0); } // en caso de error, poner 0
-    };
-    recalc(); // cálculo inicial
-    const un = subscribe(recalc); // suscribirse a cambios en el store
-    return () => { try{ un && un(); }catch{} }; // limpieza al desmontar
-  },[]);
-  // Clase para enlaces activos
-  const linkClass = ({ isActive }) => "nav-link px-3" + (isActive ? " active" : "");
-// Renderizar barra de navegación
+import { Store } from "../data/store";
+
+export default function Navbar() {
+
+  // estado interno del contador del carrito
+  const [cartCount, setCartCount] = useState(0);
+
+  // función para recalcular total de unidades en carrito
+  const recomputeCart = () => {
+    try {
+      const items = Store.getCart();
+      const total = items.reduce((sum, it) => sum + Number(it.qty || 0), 0);
+      setCartCount(total);
+    } catch {
+      setCartCount(0);
+    }
+  };
+
+  useEffect(() => {
+    // primera carga
+    recomputeCart();
+
+    // suscribirse SOLO a cambios del carrito
+    const un = Store.subscribeCart(() => {
+      recomputeCart();
+    });
+
+    return () => un();
+  }, []);
+
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark fixed-top navbar-glass">
+    <nav className="navbar navbar-expand-lg navbar-dark navbar-glass fixed-top">
       <div className="container">
+
+        {/* LOGO */}
         <Link className="navbar-brand fw-bold" to="/">
-          <span className="text-success">K&N</span> Skins
+          CSGO Skins
         </Link>
 
-        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+        <button
+          className="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#nav"
+        >
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        <div id="mainNav" className="collapse navbar-collapse">
+        <div id="nav" className="collapse navbar-collapse">
+          
+          {/* Links izquierda */}
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-            <li className="nav-item"><NavLink className={linkClass} to="/">Inicio</NavLink></li>
-            <li className="nav-item"><NavLink className={linkClass} to="/productos">Productos</NavLink></li>
-            <li className="nav-item"><NavLink className={linkClass} to="/blog">Blogs</NavLink></li>
-            <li className="nav-item"><NavLink className={linkClass} to="/nosotros">Nosotros</NavLink></li>
-            <li className="nav-item"><NavLink className={linkClass} to="/contacto">Contacto</NavLink></li>
+            <li className="nav-item"><NavLink className="nav-link" to="/">Inicio</NavLink></li>
+            <li className="nav-item"><NavLink className="nav-link" to="/productos">Productos</NavLink></li>
+            <li className="nav-item"><NavLink className="nav-link" to="/nosotros">Nosotros</NavLink></li>
+            <li className="nav-item"><NavLink className="nav-link" to="/blog">Blog</NavLink></li>
+            <li className="nav-item"><NavLink className="nav-link" to="/contacto">Contáctanos</NavLink></li>
           </ul>
 
-          <div className="d-flex gap-2">
-            <Link className="btn btn-outline-light btn-sm btn-soft" to="/auth">Login / Registro</Link>
-            <Link className="btn btn-outline-light btn-sm btn-soft position-relative" to="/carrito">
-              Carrito
-              {count > 0 && (
-                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success cart-badge">
-                  {count}
-                </span>
-              )}
-            </Link>
-          </div>
+          {/* derecha */}
+          <ul className="navbar-nav ms-auto">
+            <li className="nav-item"><NavLink className="nav-link" to="/Auth">Login / Registro</NavLink></li>
+            <li className="nav-item position-relative">
+              <NavLink className="nav-link" to="/carrito">
+                🛒 Carrito
+                {cartCount > 0 && (
+                  <span className="badge bg-success rounded-pill cart-badge ms-1">
+                    {cartCount}
+                  </span>
+                )}
+              </NavLink>
+            </li>
+          </ul>
+
         </div>
+
       </div>
     </nav>
   );

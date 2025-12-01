@@ -1,16 +1,29 @@
 // Colección de validadores y normalizadores usados en toda la app.
 
 // ========================= Email =========================
-const ALLOWED_DOMAINS = ["duocuc.cl", "outlook.com", "gmail.com"];
 
-// Valida formato básico y dominio permitido
+// Ahora permite todos los dominios.
 export function validateEmail(email) {
   if (!email) return false;
-  const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); // formato básico
-  if (!ok) return false; // fallo rápido
-  const domain = email.split("@")[1].toLowerCase(); // dominio
-  return ALLOWED_DOMAINS.includes(domain); // dominio permitido
+
+  // 1) Regla base (sin espacios, caracteres raros, estructura correcta)
+  const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+
+  if (!emailRegex.test(email)) return false;
+
+  // 2) Bloquear doble punto en cualquier parte
+  if (email.includes("..")) return false;
+
+  // 3) No permitir punto al inicio o al final del usuario
+  const [user, domain] = email.split("@");
+  if (user.startsWith(".") || user.endsWith(".")) return false;
+
+  // 4) No permitir punto al inicio o al final del dominio
+  if (domain.startsWith(".") || domain.endsWith(".")) return false;
+
+  return true;
 }
+
 // ======================== Password =========================
 // Mínimo 6 caracteres, al menos una mayuscula, una minuscula, un numero y un simbolo
 export function validateStrongPassword(pwd) {
