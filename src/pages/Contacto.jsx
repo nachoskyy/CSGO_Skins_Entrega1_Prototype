@@ -50,7 +50,6 @@ export default function Contacto(){
                 required
               />
               {emailErr && <div className="invalid-feedback">{emailErr}</div>}
-              {!emailErr && <div className="form-text text-secondary">Se permiten: duocuc.cl, outlook.com, gmail.com</div>}
             </div>
             <div className="mb-3">
               <label className="form-label">Mensaje</label>

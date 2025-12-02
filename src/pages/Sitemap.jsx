@@ -17,9 +17,6 @@ export default function SiteMap() {
           <li><Link to="/auth">Login / Registro</Link></li>
           <li><Link to="/carrito">Carrito</Link></li>
           <li><Link to="/checkout">Checkout</Link></li>
-          <li><Link to="/admin">Admin</Link></li>
-          <li><Link to="/admin/productos">Admin · Productos</Link></li>
-          <li><Link to="/admin/ordenes">Admin · Órdenes</Link></li>
         </ul>
       </section>
     </div>
